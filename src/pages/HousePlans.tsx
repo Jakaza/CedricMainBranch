@@ -124,7 +124,7 @@ function HousePlanCard({ plan }: { plan: HousePlan }) {
                 <svg className="w-4 h-4 mr-1 fill-current" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-                HousePlan Video
+                Watch Houseplan Video
               </Button>
             )}
           </div>
@@ -321,9 +321,6 @@ function HousePlanCard({ plan }: { plan: HousePlan }) {
 
               {/* Action Buttons */}
               <div className="border-t pt-6 flex gap-3">
-                <Button className="flex-1" size="lg">
-                  Get Quote
-                </Button>
                 <Button 
                   className="flex-1 bg-green-600 hover:bg-green-700" 
                   size="lg"
