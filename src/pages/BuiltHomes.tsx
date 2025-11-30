@@ -609,22 +609,24 @@ export const BuiltHomes = () => {
     <>
       <Header />
       <div className="min-h-screen bg-background">
-        <div className="flex">
+        <div className="flex flex-col md:flex-row">
           {/* Filter Sidebar */}
-          <FilterSidebar onFilterChange={setFilters} onClearAll={handleClearFilters} />
+          <div className="hidden md:block md:w-64 lg:w-72">
+            <FilterSidebar onFilterChange={setFilters} onClearAll={handleClearFilters} />
+          </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 w-full md:overflow-hidden">
             {/* Header */}
-            <div className="border-b bg-background sticky top-0 z-10">
-              <div className="px-8 py-6">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <h1 className="text-3xl font-bold text-foreground whitespace-nowrap">
+            <div className="border-b bg-background sticky top-16 md:top-0 z-10">
+              <div className="px-4 md:px-8 py-4 md:py-6">
+                <div className="flex flex-col gap-4 mb-4">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                     Built Homes Showcase
                   </h1>
 
                   {/* Search Bar */}
-                  <div className="flex items-center gap-2 flex-1 max-w-sm">
+                  <div className="flex items-center gap-2 w-full">
                     <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     <Input
                       type="text"
@@ -655,13 +657,13 @@ export const BuiltHomes = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   {/* Sort Dropdown */}
                   <Select
                     value={sortBy}
                     onValueChange={(value) => setSortBy(value as SortOption)}
                   >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
                     <SelectContent>
@@ -695,17 +697,17 @@ export const BuiltHomes = () => {
                 </div>
               </div>
               
-              <p className="text-muted-foreground">
+              <p className="text-sm md:text-base text-muted-foreground px-4 md:px-8 pb-4">
                 Showing {filteredAndSortedPlans.length} results
               </p>
             </div>
 
             {/* Built Homes Grid */}
-            <div className="p-8">
+            <div className="p-4 md:p-6 lg:p-8">
               <div
                 className={
                   viewMode === 'grid'
-                    ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'
                     : 'space-y-4'
                 }
               >
