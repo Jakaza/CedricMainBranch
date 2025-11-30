@@ -512,6 +512,9 @@ export const BuiltHomes = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
   const itemsPerPage = 6;
 
   // Listen for search events from header
@@ -525,6 +528,28 @@ export const BuiltHomes = () => {
     window.addEventListener('planSearch', handleSearch);
     return () => window.removeEventListener('planSearch', handleSearch);
   }, []);
+
+  // Handle scroll to hide/show header on mobile
+  useEffect(() => {
+    const contentElement = contentRef.current;
+    if (!contentElement) return;
+
+    const handleScroll = () => {
+      const currentScrollY = contentElement.scrollTop;
+      
+      // Show header when scrolling up, hide when scrolling down
+      if (currentScrollY < lastScrollY) {
+        setShowHeader(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setShowHeader(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    contentElement.addEventListener('scroll', handleScroll);
+    return () => contentElement.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Filter and sort built homes
   const filteredAndSortedPlans = useMemo(() => {
@@ -624,9 +649,17 @@ export const BuiltHomes = () => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 w-full md:overflow-hidden">
-            {/* Header */}
-            <div className="border-b bg-background sticky top-16 md:top-0 z-10">
+          <div 
+            ref={contentRef}
+            className="flex-1 w-full overflow-y-auto md:overflow-hidden"
+            style={{ maxHeight: 'calc(100vh - 4rem)' }}
+          >
+            {/* Header - Hidden on mobile when scrolling */}
+            <div 
+              className={`border-b bg-background sticky top-0 z-10 transition-all duration-300 md:translate-y-0 ${
+                showHeader ? 'translate-y-0' : '-translate-y-full'
+              }`}
+            >
               <div className="px-4 md:px-8 py-4 md:py-6">
                 <div className="flex flex-col gap-4 mb-4">
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground">
