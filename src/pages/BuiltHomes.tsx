@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Grid3x3, List, CircleHelp, Heart, Home, Bed, Bath, Car, Search, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Grid3x3, List, CircleHelp, Heart, Home, Bed, Bath, Car, Search, X, ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,6 +20,13 @@ import {
 } from '@/components/ui/pagination';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from '@/components/ui/drawer';
 import { builtHomes } from '@/data/builtHomes';
 import { FilterState, SortOption, HousePlan } from '@/types/housePlan';
 import { cn } from '@/lib/utils';
@@ -504,6 +511,7 @@ export const BuiltHomes = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const itemsPerPage = 6;
 
   // Listen for search events from header
@@ -625,7 +633,7 @@ export const BuiltHomes = () => {
                     Built Homes Showcase
                   </h1>
 
-                  {/* Search Bar */}
+                  {/* Search Bar and Filter Button */}
                   <div className="flex items-center gap-2 w-full">
                     <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     <Input
@@ -655,6 +663,15 @@ export const BuiltHomes = () => {
                         <X className="h-4 w-4" />
                       </Button>
                     )}
+                    {/* Filter Button (Mobile Only) */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="md:hidden"
+                      onClick={() => setIsFilterDrawerOpen(true)}
+                    >
+                      <SlidersHorizontal className="h-4 w-4" />
+                    </Button>
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -788,6 +805,25 @@ export const BuiltHomes = () => {
         >
           <CircleHelp className="h-6 w-6" />
         </Button>
+
+        {/* Filter Drawer (Mobile) */}
+        <Drawer open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+          <DrawerContent>
+            <DrawerHeader className="border-b">
+              <div className="flex items-center justify-between">
+                <DrawerTitle>Filters</DrawerTitle>
+                <DrawerClose asChild>
+                  <Button variant="ghost" size="icon">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </DrawerClose>
+              </div>
+            </DrawerHeader>
+            <div className="overflow-y-auto max-h-[70vh]">
+              <FilterSidebar onFilterChange={setFilters} onClearAll={handleClearFilters} />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
     </>
   );
