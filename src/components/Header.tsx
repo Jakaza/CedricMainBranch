@@ -1,7 +1,8 @@
-import { Home, Search, X } from "lucide-react";
+import { Home, Search, X, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { chatBotRef } from "./ChatBot";
 
 const Header = () => {
   const location = useLocation();
@@ -49,6 +50,13 @@ const Header = () => {
         </nav>
         
         <div className="flex items-center gap-4">
+          <Button 
+            onClick={() => chatBotRef.current?.open()}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Munyai AI
+          </Button>
           <Link to="/get-quote">
             <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
               Get FREE Quote Now

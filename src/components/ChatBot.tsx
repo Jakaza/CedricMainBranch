@@ -10,7 +10,14 @@ interface Message {
   timestamp: Date;
 }
 
-const SYSTEM_PROMPT = `You are a helpful AI assistant for Cedric House Designs, a company that provides high-quality house plans and architectural services in South Africa. 
+export interface ChatBotHandle {
+  open: () => void;
+  close: () => void;
+}
+
+export const chatBotRef: { current: ChatBotHandle | null } = { current: null };
+
+const SYSTEM_PROMPT = `You are Munyai AI, a helpful and friendly AI assistant for Cedric House Designs, a company that provides high-quality house plans and architectural services in South Africa. 
 
 Company Information:
 - Located in South Africa
@@ -50,7 +57,7 @@ export function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! 👋 I\'m the Cedric House Designs AI Assistant. How can I help you today? Feel free to ask about our house plans, services, pricing, or anything else related to our designs.',
+      text: 'Hello! 👋 I\'m Munyai AI, Cedric House Designs\' intelligent assistant. How can I help you today? Feel free to ask about our house plans, services, pricing, or anything else related to our designs.',
       sender: 'ai',
       timestamp: new Date(),
     },
@@ -66,6 +73,13 @@ export function ChatBot() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    chatBotRef.current = {
+      open: () => setIsOpen(true),
+      close: () => setIsOpen(false),
+    };
+  }, []);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,7 +180,7 @@ export function ChatBot() {
         <div className="fixed bottom-24 right-6 z-40 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col max-h-[600px]">
           {/* Header */}
           <div className="bg-primary text-white p-4 rounded-t-lg border-b">
-            <h3 className="font-bold text-lg">Cedric AI Assistant</h3>
+            <h3 className="font-bold text-lg">Munyai AI</h3>
             <p className="text-xs opacity-90">Ask about our house plans & services</p>
           </div>
 

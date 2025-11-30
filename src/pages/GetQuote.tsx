@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Home, Upload, Palette, Bed, DollarSign, Send, CheckCircle, MessageCircle } from 'lucide-react';
+import { Home, Palette, Bed, DollarSign, Send, CheckCircle, MessageCircle } from 'lucide-react';
 
 const GetQuote = () => {
   const [formData, setFormData] = useState({
@@ -18,13 +18,12 @@ const GetQuote = () => {
     bedrooms: '',
     bathrooms: '',
     otherRooms: '',
-    propertySize: '',
+    yardLength: '',
+    yardBreadth: '',
     budget: '',
     description: '',
-    image: null as File | null,
   });
 
-  const [uploadedFileName, setUploadedFileName] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -35,21 +34,14 @@ const GetQuote = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData(prev => ({
-        ...prev,
-        image: file,
-      }));
-      setUploadedFileName(file.name);
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Format message for WhatsApp
+    const yardSize = formData.yardLength && formData.yardBreadth 
+      ? `${formData.yardLength}m x ${formData.yardBreadth}m` 
+      : 'Not specified';
+    
     const message = `*Custom House Plan Quote Request*
 
 *Personal Details:*
@@ -65,13 +57,11 @@ Bathrooms: ${formData.bathrooms}
 Other Rooms: ${formData.otherRooms || 'None specified'}
 
 *Property Details:*
-Property Size: ${formData.propertySize} sqm
+Yard Size: ${yardSize}
 Budget: ${formData.budget}
 
 *Description:*
 ${formData.description}
-
-${uploadedFileName ? `*Uploaded File:* ${uploadedFileName}` : ''}
 
 Please contact me to discuss this quote.`;
 
@@ -97,12 +87,11 @@ Please contact me to discuss this quote.`;
         bedrooms: '',
         bathrooms: '',
         otherRooms: '',
-        propertySize: '',
+        yardLength: '',
+        yardBreadth: '',
         budget: '',
         description: '',
-        image: null,
       });
-      setUploadedFileName('');
     }, 3000);
   };
 
@@ -124,22 +113,17 @@ Please contact me to discuss this quote.`;
   ];
 
   const budgetOptions = [
-    'R500K - R1M',
-    'R1M - R2M',
-    'R2M - R3M',
-    'R3M - R5M',
-    'R5M - R10M',
-    'R10M+',
+    'R1,000 - R1,500',
+    'R2,000 - R2,500',
+    'R3,000 - R3,500',
+    'R4,000 - R4,500',
+    'R5,000 - R5,500',
+    'R6,000 - R6,500',
+    'R7,000 - R7,500',
+    'R8,000 - R8,500',
+    'R9,000 - R9,500',
+    'R10,000+',
     'Not sure yet',
-  ];
-
-  const sizeOptions = [
-    '100 - 150',
-    '150 - 200',
-    '200 - 300',
-    '300 - 400',
-    '400 - 500',
-    '500+',
   ];
 
   return (
@@ -194,8 +178,27 @@ Please contact me to discuss this quote.`;
                   <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
                   <h2 className="text-3xl font-bold text-green-800 mb-2">Quote Submitted Successfully!</h2>
                   <p className="text-green-700 mb-4">
-                    Your request has been sent to our team via WhatsApp. We'll review it and get back to you soon.
+                    Your quote message has been opened in WhatsApp.
                   </p>
+                  {uploadedFileName && (
+                    <div className="bg-white rounded-lg p-4 mb-4 border-2 border-green-400">
+                      <p className="text-sm text-green-800 font-semibold mb-3">
+                        📎 You have uploaded: <strong>{uploadedFileName}</strong>
+                      </p>
+                      <div className="bg-blue-50 p-3 rounded border border-blue-300 mb-3">
+                        <p className="text-xs text-blue-800 font-medium mb-2">✅ NEXT STEP:</p>
+                        <ol className="text-xs text-blue-800 space-y-1 text-left">
+                          <li>1. Go to the WhatsApp chat that just opened</li>
+                          <li>2. Click the paperclip icon (📎) to attach files</li>
+                          <li>3. Select and send your image file: <strong>{uploadedFileName}</strong></li>
+                          <li>4. Send the message</li>
+                        </ol>
+                      </div>
+                      <p className="text-xs text-green-700">
+                        Your quote message has already been sent. Just add the image and send!
+                      </p>
+                    </div>
+                  )}
                   <Button onClick={() => window.location.reload()}>Start New Quote</Button>
                 </Card>
               ) : (
@@ -338,19 +341,34 @@ Please contact me to discuss this quote.`;
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">Stand/Yard Size (sqm) *</label>
-                        <select
-                          name="propertySize"
-                          value={formData.propertySize}
-                          onChange={handleChange}
-                          className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                          required
-                        >
-                          <option value="">Select size range</option>
-                          {sizeOptions.map(size => (
-                            <option key={size} value={size}>{size} sqm</option>
-                          ))}
-                        </select>
+                        <label className="block text-sm font-medium text-foreground mb-2">Stand/Yard Size *</label>
+                        <p className="text-xs text-muted-foreground mb-4">Let's use length and breadth... Example: 20m x 30m</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-foreground mb-2">Length (m) *</label>
+                            <Input
+                              type="number"
+                              name="yardLength"
+                              value={formData.yardLength}
+                              onChange={handleChange}
+                              placeholder="e.g., 20"
+                              min="1"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-foreground mb-2">Breadth (m) *</label>
+                            <Input
+                              type="number"
+                              name="yardBreadth"
+                              value={formData.yardBreadth}
+                              onChange={handleChange}
+                              placeholder="e.g., 30"
+                              min="1"
+                              required
+                            />
+                          </div>
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-foreground mb-2">Budget *</label>
@@ -389,27 +407,6 @@ Please contact me to discuss this quote.`;
                       <p className="text-xs text-muted-foreground mt-2">
                         The more details you provide, the better we can understand your vision.
                       </p>
-                    </div>
-
-                    <div className="mt-6">
-                      <label className="block text-sm font-medium text-foreground mb-2">Upload Sketches or Reference Images (Optional)</label>
-                      <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
-                        <input
-                          type="file"
-                          onChange={handleFileChange}
-                          accept="image/*,.pdf,.sketch"
-                          className="hidden"
-                          id="file-upload"
-                        />
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          <Upload className="h-8 w-8 text-primary mx-auto mb-2" />
-                          <p className="text-sm font-medium text-foreground">Click to upload or drag and drop</p>
-                          <p className="text-xs text-muted-foreground">PNG, JPG, PDF, SKETCH up to 10MB</p>
-                          {uploadedFileName && (
-                            <Badge className="mt-2 inline-block">{uploadedFileName}</Badge>
-                          )}
-                        </label>
-                      </div>
                     </div>
                   </Card>
 

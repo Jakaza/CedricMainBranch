@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Grid3x3, List, CircleHelp, Heart, Home, Bed, Bath, Car, Search, X } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Grid3x3, List, CircleHelp, Heart, Home, Bed, Bath, Car, Search, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -35,6 +35,28 @@ function HousePlanCard({ plan }: { plan: HousePlan }) {
   const [showVideo, setShowVideo] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const detailsScrollRef = useRef<HTMLDivElement>(null);
+
+  // Check if content is scrollable when modal opens
+  useEffect(() => {
+    if (showDetails && detailsScrollRef.current) {
+      const isScrollableContent = detailsScrollRef.current.scrollHeight > detailsScrollRef.current.clientHeight;
+      setIsScrollable(isScrollableContent);
+    }
+  }, [showDetails]);
+
+  const scrollDown = () => {
+    if (detailsScrollRef.current) {
+      detailsScrollRef.current.scrollBy({ top: 150, behavior: 'smooth' });
+    }
+  };
+
+  const scrollUp = () => {
+    if (detailsScrollRef.current) {
+      detailsScrollRef.current.scrollBy({ top: -150, behavior: 'smooth' });
+    }
+  };
 
   return (
     <>
@@ -216,7 +238,7 @@ function HousePlanCard({ plan }: { plan: HousePlan }) {
           onClick={() => setShowDetails(false)}
         >
           <div 
-            className="bg-white rounded-lg overflow-hidden max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-lg overflow-hidden max-w-2xl w-full max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -232,8 +254,11 @@ function HousePlanCard({ plan }: { plan: HousePlan }) {
               </button>
             </div>
 
-            {/* Content */}
-            <div className="p-6 space-y-6">
+            {/* Scrollable Content */}
+            <div 
+              ref={detailsScrollRef}
+              className="flex-1 overflow-y-auto p-6 space-y-6"
+            >
               {/* Featured Image */}
               <div className="rounded-lg overflow-hidden bg-gray-200">
                 <img
@@ -318,23 +343,48 @@ function HousePlanCard({ plan }: { plan: HousePlan }) {
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Action Buttons */}
-              <div className="border-t pt-6 flex gap-3">
-                <Button 
-                  className="flex-1 bg-green-600 hover:bg-green-700" 
-                  size="lg"
-                  onClick={() => {
-                    setShowDetails(false);
-                    setShowPayment(true);
-                  }}
+            {/* Scroll Indicator */}
+            {isScrollable && (
+              <div className="bg-blue-50 border-t border-blue-200 py-2 flex justify-center items-center gap-2 animate-pulse">
+                <button
+                  onClick={scrollUp}
+                  className="p-1 hover:bg-blue-200 rounded transition-colors"
+                  title="Scroll Up"
                 >
-                  Buy Online
-                </Button>
-                <Button variant="outline" className="flex-1" size="lg" onClick={() => setShowDetails(false)}>
-                  Close
-                </Button>
+                  <ChevronUp className="w-5 h-5 text-blue-600" />
+                </button>
+                <div className="flex items-center gap-1">
+                  <ChevronDown className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs text-blue-600 font-medium">Scroll</span>
+                  <ChevronDown className="w-4 h-4 text-blue-600" />
+                </div>
+                <button
+                  onClick={scrollDown}
+                  className="p-1 hover:bg-blue-200 rounded transition-colors"
+                  title="Scroll Down"
+                >
+                  <ChevronDown className="w-5 h-5 text-blue-600" />
+                </button>
               </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="border-t bg-gray-50 p-6 flex gap-3">
+              <Button 
+                className="flex-1 bg-green-600 hover:bg-green-700" 
+                size="lg"
+                onClick={() => {
+                  setShowDetails(false);
+                  setShowPayment(true);
+                }}
+              >
+                Buy Online
+              </Button>
+              <Button variant="outline" className="flex-1" size="lg" onClick={() => setShowDetails(false)}>
+                Close
+              </Button>
             </div>
           </div>
         </div>
