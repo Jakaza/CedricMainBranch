@@ -308,7 +308,8 @@ const Contact = () => {
             </div>
             
             <div className="pt-8 border-t border-primary-foreground/20 text-center text-sm">
-              <p>© 2024 Cedric House Planning and Construction. All rights reserved.</p>
+              <p className="mb-2">© 2024 Cedric House Planning and Construction. All rights reserved.</p>
+              <p className="text-xs">Website Developers: <a href="#" className="text-red-400 hover:text-red-300 transition-opacity">TAD Developers</a></p>
             </div>
           </div>
         </footer>

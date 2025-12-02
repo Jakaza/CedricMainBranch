@@ -469,7 +469,8 @@ const Index = () => {
           </div>
           
           <div className="pt-8 border-t border-border/20 text-center text-sm">
-            <p>© 2024 Cedric House Planning and Construction. All rights reserved.</p>
+            <p className="mb-2">© 2024 Cedric House Planning and Construction. All rights reserved.</p>
+            <p className="text-xs">Website Developers: <a href="#" className="text-red-600 hover:text-red-700 hover:underline">TAD Developers</a></p>
           </div>
         </div>
       </footer>

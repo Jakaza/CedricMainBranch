@@ -1,3 +1,14 @@
+export interface FloorRoom {
+  name: string;
+  quantity: number;
+}
+
+export interface Floor {
+  number: number;
+  name: string;
+  rooms: FloorRoom[];
+}
+
 export interface HousePlan {
   id: string;
   title: string;
@@ -16,6 +27,14 @@ export interface HousePlan {
   description?: string;
   features?: string[];
   videoUrl?: string;
+  enSuite?: number;
+  lounges?: number;
+  diningAreas?: number;
+  garageParking?: number;
+  coveredParking?: number;
+  petFriendly?: boolean;
+  amenities?: string[];
+  floors?: Floor[];
 }
 
 export interface FilterState {
