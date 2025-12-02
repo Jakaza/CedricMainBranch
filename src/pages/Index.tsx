@@ -66,7 +66,7 @@ const HousePlanCard = ({
           </div>
           <div className="flex items-center gap-1">
             <Square className="h-4 w-4" />
-            <span>{sqft} sq ft</span>
+            <span>{sqft} m²</span>
           </div>
         </div>
         
@@ -141,7 +141,7 @@ const Index = () => {
       title: "The Madison",
       beds: 3,
       baths: 2,
-      sqft: "2,150",
+      sqft: "200",
       price: "1,299"
     },
     {
@@ -149,7 +149,7 @@ const Index = () => {
       title: "The Oakwood",
       beds: 4,
       baths: 3,
-      sqft: "2,850",
+      sqft: "265",
       price: "1,599"
     },
     {
@@ -157,7 +157,7 @@ const Index = () => {
       title: "The Summit",
       beds: 5,
       baths: 4,
-      sqft: "3,200",
+      sqft: "297",
       price: "2,299"
     }
   ];
@@ -169,7 +169,7 @@ const Index = () => {
       title: "The Craftsman",
       beds: 3,
       baths: 2,
-      sqft: "1,850",
+      sqft: "172",
       price: "999",
       isBestseller: true
     },
@@ -178,7 +178,7 @@ const Index = () => {
       title: "The Colonial",
       beds: 4,
       baths: 3,
-      sqft: "2,400",
+      sqft: "223",
       price: "1,399",
       isBestseller: true
     },
@@ -187,7 +187,7 @@ const Index = () => {
       title: "The Ranch",
       beds: 3,
       baths: 2,
-      sqft: "1,650",
+      sqft: "153",
       price: "899",
       isBestseller: true
     },
@@ -196,7 +196,7 @@ const Index = () => {
       title: "The Contemporary",
       beds: 4,
       baths: 3,
-      sqft: "2,650",
+      sqft: "246",
       price: "1,699",
       isBestseller: true
     }
