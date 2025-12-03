@@ -1,17 +1,18 @@
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Home, 
-  Pencil, 
-  Edit3, 
-  Hammer, 
-  Eye, 
-  DollarSign, 
-  Users, 
-  MapPin, 
-  CheckCircle, 
+import {
+  Home,
+  Pencil,
+  Edit3,
+  Hammer,
+  Eye,
+  DollarSign,
+  Users,
+  MapPin,
+  CheckCircle,
   FileCheck,
   ArrowRight,
   Zap,
@@ -20,60 +21,34 @@ import {
 import { Link } from 'react-router-dom';
 import house1 from '@/assets/house1.jpg';
 import house2 from '@/assets/house2.jpg';
+import { settingsService, Service, PlanModification } from '@/services/settingsService';
 
 const Services = () => {
-  const services = [
-    {
-      icon: Home,
-      title: 'Standard House Plans',
-      description: 'Ready-to-use architectural plans with complete sets including floor plans, 3D renders, and elevations.',
-      badge: 'Popular',
-    },
-    {
-      icon: Pencil,
-      title: 'Custom House Design',
-      description: 'Personalized designs created from scratch based on your requirements, style preferences, and budget.',
-      badge: 'Premium',
-    },
-    {
-      icon: Edit3,
-      title: 'Plan Modifications',
-      description: 'Professional edits to existing plans including room additions/removals, façade changes, and layout adjustments.',
-    },
-    {
-      icon: Hammer,
-      title: 'Construction',
-      description: 'Complete structural drawings, electrical layouts, and plumbing & drainage plans for construction.',
-      badge: 'Technical',
-    },
-    {
-      icon: Eye,
-      title: '3D Rendering & Visualization',
-      description: 'Photo-realistic 3D exterior and interior renders with virtual walkthroughs and interactive tours.',
-      badge: 'Premium',
-    },
-    {
-      icon: DollarSign,
-      title: 'Building Cost Estimation',
-      description: 'Professional cost calculations with detailed material lists and budget guidance for your project.',
-    },
-    {
-      icon: Users,
-      title: 'Project Consultation',
-      description: 'One-on-one consultation with our experienced architects for expert advice on regulations and requirements.',
-    },
-    {
-      icon: MapPin,
-      title: 'Site Analysis',
-      description: 'Comprehensive evaluation of plot shape, slope, zoning rules, and recommendations for best plan options.',
-    },
-    {
-      icon: CheckCircle,
-      title: 'Engineer Sign-Off',
-      description: 'Structural certification and professional endorsement for approved plans and designs.',
-      badge: 'Official',
-    },
-  ];
+  const [services, setServices] = useState<Service[]>([]);
+  const [planModifications, setPlanModifications] = useState<PlanModification[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [servicesData, modificationsData] = await Promise.all([
+          settingsService.getServices(),
+          settingsService.getPlanModifications()
+        ]);
+        setServices(servicesData);
+        setPlanModifications(modificationsData);
+      } catch (error) {
+        console.error('Error fetching services data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const getIcon = (iconName: string) => {
+    const icons: { [key: string]: any } = {
+      Home, Pencil, Edit3, Hammer, Eye, DollarSign, Users, MapPin, CheckCircle, FileCheck, Zap
+    };
+    return icons[iconName] || Home;
+  };
 
   const processSteps = [
     {
@@ -140,7 +115,7 @@ const Services = () => {
       <Header />
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <div 
+        <div
           className="relative bg-cover bg-center py-32 text-white"
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${house1})`,
@@ -163,12 +138,12 @@ const Services = () => {
                 From concept to completion, we offer comprehensive architectural services to bring your dream home to life.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map((service, index) => {
-                const Icon = service.icon;
+                const Icon = getIcon(service.icon_name);
                 return (
-                  <Card key={index} className="p-8 hover:shadow-xl transition-all duration-300 hover:border-primary group">
+                  <Card key={service.id} className="p-8 hover:shadow-xl transition-all duration-300 hover:border-primary group">
                     <div className="flex items-start justify-between mb-4">
                       <div className="p-4 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                         <Icon className="h-8 w-8 text-primary" />
@@ -179,14 +154,10 @@ const Services = () => {
                         </Badge>
                       )}
                     </div>
-                    
+
                     <h3 className="text-xl font-bold text-foreground mb-3">{service.title}</h3>
                     <p className="text-muted-foreground mb-6 leading-relaxed">{service.description}</p>
-                    
-                    <button className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all">
-                      Learn More
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
+
                   </Card>
                 );
               })}
@@ -201,7 +172,7 @@ const Services = () => {
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-center mb-16">
               A structured, collaborative approach to create your perfect home.
             </p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {processSteps.map((step, index) => (
                 <div key={index} className="relative">
@@ -228,34 +199,15 @@ const Services = () => {
               <div>
                 <h2 className="text-4xl font-bold text-foreground mb-6">Professional Plan Modifications</h2>
                 <ul className="space-y-4">
-                  <li className="flex gap-3">
-                    <CheckCircle className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-foreground">Room Additions & Removals</h4>
-                      <p className="text-muted-foreground">Easily customize your plan layout</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-3">
-                    <CheckCircle className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-foreground">Façade Changes</h4>
-                      <p className="text-muted-foreground">Update the external appearance</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-3">
-                    <CheckCircle className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-foreground">Layout Optimization</h4>
-                      <p className="text-muted-foreground">Improve space usage and flow</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-3">
-                    <CheckCircle className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-foreground">Fast Turnaround</h4>
-                      <p className="text-muted-foreground">Quick modifications without delays</p>
-                    </div>
-                  </li>
+                  {planModifications.map((mod) => (
+                    <li key={mod.id} className="flex gap-3">
+                      <CheckCircle className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                      <div>
+                        <h4 className="font-semibold text-foreground">{mod.title}</h4>
+                        <p className="text-muted-foreground">{mod.description}</p>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               </div>
               <img src={house2} alt="Plan Modifications" className="rounded-lg shadow-lg" />
@@ -278,7 +230,7 @@ const Services = () => {
         </div>
 
         {/* Call-To-Action Section */}
-        <div 
+        <div
           className="relative bg-cover bg-center py-32 text-white"
           style={{
             backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${house1})`,
@@ -317,7 +269,7 @@ const Services = () => {
                   Creating beautiful, functional house plans for your dream home.
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">House Plans</h3>
                 <ul className="space-y-2 text-sm">
@@ -327,7 +279,7 @@ const Services = () => {
                   <li><a href="#" className="hover:opacity-80 transition-opacity">Luxury Plans</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Services</h3>
                 <ul className="space-y-2 text-sm">
@@ -337,7 +289,7 @@ const Services = () => {
                   <li><a href="#" className="hover:opacity-80 transition-opacity">Cost Estimates</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Support</h3>
                 <ul className="space-y-2 text-sm">
@@ -348,7 +300,7 @@ const Services = () => {
                 </ul>
               </div>
             </div>
-            
+
             <div className="pt-8 border-t border-primary-foreground/20 text-center text-sm">
               <p className="mb-2">© 2024 Cedric House Planning and Construction. All rights reserved.</p>
               <p className="text-xs">Website Developers: <a href="#" className="text-red-400 hover:text-red-300 transition-opacity">TAD Developers</a></p>

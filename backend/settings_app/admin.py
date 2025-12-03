@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SiteSettings, ContactInformation, TeamMember, Testimonial
+from .models import SiteSettings, ContactInformation, TeamMember, Testimonial, Service, PlanModification, WhyTrustUs, Certification
 
 class SingletonAdmin(admin.ModelAdmin):
     """Admin class for Singleton models."""
@@ -53,3 +53,33 @@ class TestimonialAdmin(admin.ModelAdmin):
     list_display = ('name', 'role', 'rating', 'is_active')
     list_filter = ('rating', 'is_active')
     search_fields = ('name', 'content')
+
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'badge', 'order', 'is_active')
+    list_editable = ('order', 'is_active')
+    list_filter = ('is_active', 'badge')
+    search_fields = ('title', 'description')
+    ordering = ('order',)
+
+@admin.register(PlanModification)
+class PlanModificationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'order')
+    list_editable = ('order',)
+    search_fields = ('title', 'description')
+    ordering = ('order',)
+
+@admin.register(WhyTrustUs)
+class WhyTrustUsAdmin(admin.ModelAdmin):
+    list_display = ('title', 'order')
+    list_editable = ('order',)
+    search_fields = ('title', 'description')
+    ordering = ('order',)
+
+@admin.register(Certification)
+class CertificationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order')
+    list_editable = ('order',)
+    search_fields = ('name',)
+    ordering = ('order',)
+

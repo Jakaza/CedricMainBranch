@@ -89,3 +89,69 @@ class Testimonial(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.rating} stars"
+
+class Service(models.Model):
+    """Service offerings displayed on the Services page."""
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    badge = models.CharField(max_length=50, blank=True, help_text="Optional badge text (e.g., 'Popular', 'Premium', 'Technical')")
+    icon_name = models.CharField(max_length=50, help_text="Lucide icon name (e.g., 'Home', 'Pencil', 'Eye')")
+    order = models.IntegerField(default=0, help_text="Display order (lower numbers appear first)")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Service"
+        verbose_name_plural = "Services"
+    
+    def __str__(self):
+        return self.title
+
+class PlanModification(models.Model):
+    """Plan modification features displayed on the Services page."""
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    order = models.IntegerField(default=0, help_text="Display order (lower numbers appear first)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Plan Modification"
+        verbose_name_plural = "Plan Modifications"
+    
+    def __str__(self):
+        return self.title
+
+class WhyTrustUs(models.Model):
+    """Trust indicators displayed on the About page."""
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    order = models.IntegerField(default=0, help_text="Display order (lower numbers appear first)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Why Trust Us Item"
+        verbose_name_plural = "Why Trust Us"
+    
+    def __str__(self):
+        return self.title
+
+class Certification(models.Model):
+    """Certifications and credentials displayed on the About page."""
+    name = models.CharField(max_length=200)
+    order = models.IntegerField(default=0, help_text="Display order (lower numbers appear first)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = "Certification"
+        verbose_name_plural = "Certifications"
+    
+    def __str__(self):
+        return self.name

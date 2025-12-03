@@ -47,6 +47,36 @@ export interface Testimonial {
     created_at: string;
 }
 
+export interface Service {
+    id: number;
+    title: string;
+    description: string;
+    badge: string;
+    icon_name: string;
+    order: number;
+    is_active: boolean;
+}
+
+export interface PlanModification {
+    id: number;
+    title: string;
+    description: string;
+    order: number;
+}
+
+export interface WhyTrustUs {
+    id: number;
+    title: string;
+    description: string;
+    order: number;
+}
+
+export interface Certification {
+    id: number;
+    name: string;
+    order: number;
+}
+
 export const settingsService = {
     async getSettings(): Promise<SiteSettings> {
         const response = await api.get<SiteSettings>('/settings/settings/');
@@ -65,6 +95,26 @@ export const settingsService = {
 
     async getTestimonials(): Promise<Testimonial[]> {
         const response = await api.get<Testimonial[]>('/settings/testimonials/');
+        return response.data;
+    },
+
+    async getServices(): Promise<Service[]> {
+        const response = await api.get<Service[]>('/settings/services/');
+        return response.data;
+    },
+
+    async getPlanModifications(): Promise<PlanModification[]> {
+        const response = await api.get<PlanModification[]>('/settings/plan-modifications/');
+        return response.data;
+    },
+
+    async getWhyTrustUs(): Promise<WhyTrustUs[]> {
+        const response = await api.get<WhyTrustUs[]>('/settings/why-trust-us/');
+        return response.data;
+    },
+
+    async getCertifications(): Promise<Certification[]> {
+        const response = await api.get<Certification[]>('/settings/certifications/');
         return response.data;
     }
 };

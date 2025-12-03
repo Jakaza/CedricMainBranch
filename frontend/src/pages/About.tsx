@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,45 +7,30 @@ import house1 from '@/assets/house1.jpg';
 import house2 from '@/assets/house2.jpg';
 import house3 from '@/assets/house3.jpg';
 import house4 from '@/assets/house4.jpg';
+import { settingsService, TeamMember, WhyTrustUs, Certification } from '@/services/settingsService';
 
 const About = () => {
-  const team = [
-    {
-      name: 'John Cedric',
-      role: 'Founder & Lead Architect',
-      experience: '25+ years',
-      specialty: 'Modern & Contemporary Design',
-      image: '👨‍💼',
-    },
-    {
-      name: 'Sarah Mitchell',
-      role: 'Design Director',
-      experience: '18+ years',
-      specialty: 'Residential Architecture',
-      image: '👩‍💼',
-    },
-    {
-      name: 'Michael Chen',
-      role: 'Project Manager',
-      experience: '15+ years',
-      specialty: 'Project Coordination',
-      image: '👨‍💻',
-    },
-    {
-      name: 'Emma Rodriguez',
-      role: 'Interior Designer',
-      experience: '12+ years',
-      specialty: 'Space Planning',
-      image: '👩‍🎨',
-    },
-  ];
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [whyTrustUs, setWhyTrustUs] = useState<WhyTrustUs[]>([]);
+  const [certifications, setCertifications] = useState<Certification[]>([]);
 
-  const certifications = [
-    { name: 'AIA Certified', icon: Award },
-    { name: 'LEED Accredited', icon: Award },
-    { name: 'Architecture Board Certified', icon: CheckCircle },
-    { name: 'ISO 9001:2015 Certified', icon: Award },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [teamData, trustData, certsData] = await Promise.all([
+          settingsService.getTeamMembers(),
+          settingsService.getWhyTrustUs(),
+          settingsService.getCertifications()
+        ]);
+        setTeam(teamData);
+        setWhyTrustUs(trustData);
+        setCertifications(certsData);
+      } catch (error) {
+        console.error('Error fetching about page data:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const portfolioItems = [
     { image: house1, title: 'Modern Riverside Estate', year: '2024' },
@@ -97,13 +83,13 @@ const About = () => {
               <div className="space-y-6">
                 <h2 className="text-4xl font-bold text-foreground">Who We Are</h2>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Cedric House Designs is a leading architectural firm specializing in residential home design and planning. 
-                  With over two decades of experience, we've built a reputation for creating beautiful, functional, and 
+                  Cedric House Designs is a leading architectural firm specializing in residential home design and planning.
+                  With over two decades of experience, we've built a reputation for creating beautiful, functional, and
                   sustainable homes that exceed our clients' expectations.
                 </p>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Our team of certified architects, designers, and project managers work collaboratively to transform 
-                  your vision into reality. We pride ourselves on understanding our clients' needs and delivering 
+                  Our team of certified architects, designers, and project managers work collaboratively to transform
+                  your vision into reality. We pride ourselves on understanding our clients' needs and delivering
                   exceptional designs that stand the test of time.
                 </p>
               </div>
@@ -122,8 +108,8 @@ const About = () => {
             <div className="max-w-4xl mx-auto space-y-6">
               <Card className="p-8 border-l-4 border-l-primary">
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  To design and deliver exceptional residential homes that combine aesthetic beauty, functional excellence, 
-                  and sustainable practices. We are committed to understanding our clients' unique vision and transforming it 
+                  To design and deliver exceptional residential homes that combine aesthetic beauty, functional excellence,
+                  and sustainable practices. We are committed to understanding our clients' unique vision and transforming it
                   into a home that brings joy, comfort, and lasting value.
                 </p>
               </Card>
@@ -212,42 +198,14 @@ const About = () => {
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-foreground mb-12 text-center">Why Clients Trust Us</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="p-8">
-                <h3 className="text-2xl font-bold text-primary mb-4">20+ Years</h3>
-                <p className="text-muted-foreground">
-                  Over two decades of proven experience in residential architecture and design excellence.
-                </p>
-              </Card>
-              <Card className="p-8">
-                <h3 className="text-2xl font-bold text-primary mb-4">500+ Projects</h3>
-                <p className="text-muted-foreground">
-                  Successfully completed over 500 residential projects with 98% client satisfaction rate.
-                </p>
-              </Card>
-              <Card className="p-8">
-                <h3 className="text-2xl font-bold text-primary mb-4">Award Winning</h3>
-                <p className="text-muted-foreground">
-                  Multiple awards for design excellence, innovation, and sustainable architecture.
-                </p>
-              </Card>
-              <Card className="p-8">
-                <h3 className="text-2xl font-bold text-primary mb-4">Transparent Process</h3>
-                <p className="text-muted-foreground">
-                  Clear communication, detailed timelines, and regular updates throughout every project.
-                </p>
-              </Card>
-              <Card className="p-8">
-                <h3 className="text-2xl font-bold text-primary mb-4">Expert Team</h3>
-                <p className="text-muted-foreground">
-                  Dedicated team of certified architects, designers, and project management professionals.
-                </p>
-              </Card>
-              <Card className="p-8">
-                <h3 className="text-2xl font-bold text-primary mb-4">Client Support</h3>
-                <p className="text-muted-foreground">
-                  Ongoing support and maintenance guidance even after project completion.
-                </p>
-              </Card>
+              {whyTrustUs.map((item) => (
+                <Card key={item.id} className="p-8">
+                  <h3 className="text-2xl font-bold text-primary mb-4">{item.title}</h3>
+                  <p className="text-muted-foreground">
+                    {item.description}
+                  </p>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
@@ -257,19 +215,16 @@ const About = () => {
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-foreground mb-12 text-center">Certifications & Experience</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {certifications.map((cert, index) => {
-                const Icon = cert.icon;
-                return (
-                  <Card key={index} className="p-6 text-center hover:shadow-lg transition-shadow">
-                    <div className="flex justify-center mb-4">
-                      <div className="p-3 bg-primary/10 rounded-full">
-                        <Icon className="h-8 w-8 text-primary" />
-                      </div>
+              {certifications.map((cert) => (
+                <Card key={cert.id} className="p-6 text-center hover:shadow-lg transition-shadow">
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 bg-primary/10 rounded-full">
+                      <Award className="h-8 w-8 text-primary" />
                     </div>
-                    <Badge className="mb-4">{cert.name}</Badge>
-                  </Card>
-                );
-              })}
+                  </div>
+                  <Badge className="mb-4">{cert.name}</Badge>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
@@ -306,9 +261,17 @@ const About = () => {
           <div className="container mx-auto px-4">
             <h2 className="text-4xl font-bold text-foreground mb-12 text-center">Our Expert Team</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {team.map((member, index) => (
-                <Card key={index} className="p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="text-4xl mb-4">{member.image}</div>
+              {team.map((member) => (
+                <Card key={member.id} className="p-6 text-center hover:shadow-lg transition-shadow">
+                  <div className="text-4xl mb-4 flex justify-center">
+                    {member.image ? (
+                      <img src={member.image} alt={member.name} className="w-24 h-24 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-3xl">
+                        👨‍💼
+                      </div>
+                    )}
+                  </div>
                   <h3 className="font-semibold text-lg text-foreground mb-1">{member.name}</h3>
                   <p className="text-primary font-medium text-sm mb-2">{member.role}</p>
                   <p className="text-muted-foreground text-sm mb-3">{member.experience}</p>
@@ -343,7 +306,7 @@ const About = () => {
                   </a>
                 </div>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">House Plans</h3>
                 <ul className="space-y-2 text-sm">
@@ -353,7 +316,7 @@ const About = () => {
                   <li><a href="#" className="hover:opacity-80 transition-opacity">Luxury Plans</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Services</h3>
                 <ul className="space-y-2 text-sm">
@@ -363,7 +326,7 @@ const About = () => {
                   <li><a href="#" className="hover:opacity-80 transition-opacity">Cost Estimates</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Support</h3>
                 <ul className="space-y-2 text-sm">
@@ -374,7 +337,7 @@ const About = () => {
                 </ul>
               </div>
             </div>
-            
+
             <div className="pt-8 border-t border-primary-foreground/20 text-center text-sm">
               <p className="mb-2">© 2024 Cedric House Planning and Construction. All rights reserved.</p>
               <p className="text-xs">Website Developers: <a href="#" className="text-red-400 hover:text-red-300 transition-opacity">TAD Developers</a></p>
