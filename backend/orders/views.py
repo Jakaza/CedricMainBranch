@@ -112,3 +112,52 @@ class PaymentCancelView(APIView):
         order.save()
         
         return Response({'status': 'Order marked as cancelled'})
+
+class DownloadReceiptView(APIView):
+    # Allow any user to download receipt (no authentication required)
+    permission_classes = []
+    
+    def get(self, request, order_id):
+        """
+        Generate and download PDF receipt for a paid order
+        """
+        from django.http import HttpResponse
+        from .utils import generate_receipt_pdf
+        
+        # Get the order
+        order = get_object_or_404(Order, id=order_id)
+        
+        # Only allow receipt download for paid orders
+        if order.status != 'PAID':
+            return Response(
+                {'error': 'Receipt can only be generated for paid orders'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Generate PDF
+        try:
+            pdf_buffer = generate_receipt_pdf(order)
+            
+            # Read the PDF content
+            pdf_content = pdf_buffer.read()
+            
+            # Return PDF as downloadable file
+            response = HttpResponse(
+                pdf_content,
+                content_type='application/pdf'
+            )
+            response['Content-Disposition'] = f'attachment; filename="receipt_{order.receipt_number}.pdf"'
+            response['Content-Length'] = len(pdf_content)
+            
+            return response
+            
+        except Exception as e:
+            import traceback
+            print(f"Error generating PDF: {e}")
+            print(traceback.format_exc())
+            return Response(
+                {'error': f'Failed to generate receipt: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+

@@ -20,5 +20,18 @@ class Order(models.Model):
     # Customer Details (optional, can be expanded)
     customer_email = models.EmailField(blank=True, null=True)
     
+    # Receipt tracking
+    receipt_generated = models.BooleanField(default=False)
+    receipt_number = models.CharField(max_length=50, blank=True, null=True, unique=True)
+    
     def __str__(self):
         return f"Order #{self.id} - {self.plan.title} - {self.status}"
+    
+    def generate_receipt_number(self):
+        """Generate a unique receipt number"""
+        if not self.receipt_number:
+            from datetime import datetime
+            timestamp = datetime.now().strftime('%Y%m%d')
+            self.receipt_number = f"RCP-{timestamp}-{self.id:05d}"
+            self.save()
+        return self.receipt_number
