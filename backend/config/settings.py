@@ -100,14 +100,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cedricdb',
-        'USER': 'cedricdb_user',
-        'PASSWORD': 'CAyzVDgNATlZ0ZxE7TFNaAvxu6XWfrLE',
-        'HOST': 'dpg-d4o2ejngi27c73dsca1g-a',
-        'PORT': '5432',  # Default PostgreSQL port
+        'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.environ.get('DATABASE_NAME', 'cedricdb'),
+        'USER': os.environ.get('DATABASE_USER', 'cedricdb_user'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'CAyzVDgNATlZ0ZxE7TFNaAvxu6XWfrLE'),
+        'HOST': os.environ.get('DATABASE_HOST', 'dpg-d4o2ejngi27c73dsca1g-a'),
+        'PORT': os.environ.get('DATABASE_PORT', '5432'),
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
