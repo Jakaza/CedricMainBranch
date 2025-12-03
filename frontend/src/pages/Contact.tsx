@@ -4,7 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Phone, Mail, Clock, MapPin, Facebook, MessageCircle, Music, Home } from 'lucide-react';
+import { Phone, Mail, Clock, MapPin, Facebook, MessageCircle, Music, Home, Loader2 } from 'lucide-react';
+import { useSubmitContact } from '@/hooks/useInquiries';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,8 @@ const Contact = () => {
     message: '',
   });
 
+  const submitContact = useSubmitContact();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -23,13 +26,17 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    // Reset form
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-    alert('Thank you for your message! We will get back to you soon.');
+
+    try {
+      await submitContact.mutateAsync(formData);
+      // Reset form on success
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      alert('Thank you for your message! We will get back to you soon.');
+    } catch (error) {
+      alert('Failed to send message. Please try again or contact us directly.');
+    }
   };
 
   const contactInfo = [
@@ -189,8 +196,15 @@ const Contact = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    Send Message
+                  <Button type="submit" className="w-full" disabled={submitContact.isPending}>
+                    {submitContact.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      'Send Message'
+                    )}
                   </Button>
                 </form>
               </div>
@@ -275,7 +289,7 @@ const Contact = () => {
                   </a>
                 </div>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">House Plans</h3>
                 <ul className="space-y-2 text-sm">
@@ -285,7 +299,7 @@ const Contact = () => {
                   <li><a href="#" className="hover:opacity-80 transition-opacity">Luxury Plans</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Services</h3>
                 <ul className="space-y-2 text-sm">
@@ -295,7 +309,7 @@ const Contact = () => {
                   <li><a href="#" className="hover:opacity-80 transition-opacity">Cost Estimates</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Support</h3>
                 <ul className="space-y-2 text-sm">
@@ -306,7 +320,7 @@ const Contact = () => {
                 </ul>
               </div>
             </div>
-            
+
             <div className="pt-8 border-t border-primary-foreground/20 text-center text-sm">
               <p className="mb-2">© 2024 Cedric House Planning and Construction. All rights reserved.</p>
               <p className="text-xs">Website Developers: <a href="#" className="text-red-400 hover:text-red-300 transition-opacity">TAD Developers</a></p>

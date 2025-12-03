@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Home, Palette, Bed, DollarSign, Send, CheckCircle, MessageCircle } from 'lucide-react';
+import { Home, Palette, Bed, DollarSign, Send, CheckCircle, MessageCircle, Loader2 } from 'lucide-react';
+import { useSubmitQuote } from '@/hooks/useInquiries';
 
 const GetQuote = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,7 @@ const GetQuote = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const submitQuote = useSubmitQuote();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -34,65 +36,36 @@ const GetQuote = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Format message for WhatsApp
-    const yardSize = formData.yardLength && formData.yardBreadth 
-      ? `${formData.yardLength}m x ${formData.yardBreadth}m` 
-      : 'Not specified';
-    
-    const message = `*Custom House Plan Quote Request*
+    try {
+      await submitQuote.mutateAsync(formData);
 
-*Personal Details:*
-Name: ${formData.fullName}
-Email: ${formData.email}
-Phone: ${formData.phone}
-City: ${formData.city}
-
-*Design Preferences:*
-Style: ${formData.preferredStyle === 'Other' ? formData.customStyle : formData.preferredStyle}
-Bedrooms: ${formData.bedrooms}
-Bathrooms: ${formData.bathrooms}
-Other Rooms: ${formData.otherRooms || 'None specified'}
-
-*Property Details:*
-Yard Size: ${yardSize}
-Budget: ${formData.budget}
-
-*Description:*
-${formData.description}
-
-Please contact me to discuss this quote.`;
-
-    // Encode message for WhatsApp URL
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/27726659790?text=${encodedMessage}`;
-
-    // Open WhatsApp
-    window.open(whatsappUrl, '_blank');
-
-    // Show success message
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      // Reset form
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        city: '',
-        preferredStyle: '',
-        customStyle: '',
-        bedrooms: '',
-        bathrooms: '',
-        otherRooms: '',
-        yardLength: '',
-        yardBreadth: '',
-        budget: '',
-        description: '',
-      });
-    }, 3000);
+      // Show success message
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        // Reset form
+        setFormData({
+          fullName: '',
+          email: '',
+          phone: '',
+          city: '',
+          preferredStyle: '',
+          customStyle: '',
+          bedrooms: '',
+          bathrooms: '',
+          otherRooms: '',
+          yardLength: '',
+          yardBreadth: '',
+          budget: '',
+          description: '',
+        });
+      }, 3000);
+    } catch (error) {
+      alert('Failed to submit quote request. Please try again.');
+    }
   };
 
   const styleOptions = [
@@ -412,9 +385,23 @@ Please contact me to discuss this quote.`;
 
                   {/* Submit Button */}
                   <div className="flex gap-4">
-                    <Button type="submit" size="lg" className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold">
-                      <Send className="h-5 w-5" />
-                      Send Quote Request to WhatsApp
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="flex-1 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold"
+                      disabled={submitQuote.isPending}
+                    >
+                      {submitQuote.isPending ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          Submitting Request...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-5 w-5" />
+                          Submit Quote Request
+                        </>
+                      )}
                     </Button>
                   </div>
 
@@ -445,7 +432,7 @@ Please contact me to discuss this quote.`;
                   </a>
                 </div>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Quick Links</h3>
                 <ul className="space-y-2 text-sm">
@@ -455,7 +442,7 @@ Please contact me to discuss this quote.`;
                   <li><a href="/services" className="hover:opacity-80 transition-opacity">Services</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">More</h3>
                 <ul className="space-y-2 text-sm">
@@ -464,7 +451,7 @@ Please contact me to discuss this quote.`;
                   <li><a href="#" className="hover:opacity-80 transition-opacity">FAQ</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Services</h3>
                 <ul className="space-y-2 text-sm">
@@ -473,7 +460,7 @@ Please contact me to discuss this quote.`;
                   <li><a href="/get-quote" className="hover:opacity-80 transition-opacity">Get Quote</a></li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-primary-foreground mb-4">Support</h3>
                 <ul className="space-y-2 text-sm">
@@ -483,7 +470,7 @@ Please contact me to discuss this quote.`;
                 </ul>
               </div>
             </div>
-            
+
             <div className="pt-8 border-t border-primary-foreground/20 text-center text-sm">
               <p>© 2024 Cedric House Planning and Construction. All rights reserved.</p>
             </div>

@@ -1,0 +1,91 @@
+from django.db import models
+from django.core.exceptions import ValidationError
+
+class SingletonModel(models.Model):
+    """Abstract model that ensures only one instance exists."""
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        if not self.pk and self.__class__.objects.exists():
+            raise ValidationError(f"There can be only one {self._meta.verbose_name} instance")
+        return super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        if cls.objects.exists():
+            return cls.objects.first()
+        return cls()
+
+class SiteSettings(SingletonModel):
+    company_name = models.CharField(max_length=100, default="Cedric House Designs")
+    tagline = models.CharField(max_length=255, default="Crafting exceptional homes and dreams")
+    hero_title = models.CharField(max_length=255, default="Find Your Perfect House Plan")
+    hero_description = models.TextField(default="Discover thousands of professionally designed house plans. From modern minimalist to classic traditional styles.")
+    
+    # About Page Content
+    about_title = models.CharField(max_length=255, default="About Cedric House Designs")
+    about_description = models.TextField(default="Crafting exceptional homes and dreams for over two decades.")
+    who_we_are_content = models.TextField(default="Cedric House Designs is a leading architectural firm...")
+    mission_statement = models.TextField(default="To design and deliver exceptional residential homes...")
+    
+    # Stats
+    years_experience = models.CharField(max_length=50, default="25+")
+    projects_completed = models.CharField(max_length=50, default="500+")
+    client_satisfaction = models.CharField(max_length=50, default="98%")
+    
+    class Meta:
+        verbose_name = "Site Settings"
+        verbose_name_plural = "Site Settings"
+
+    def __str__(self):
+        return "Site Settings"
+
+class ContactInformation(SingletonModel):
+    phone_number = models.CharField(max_length=50, default="+27 (0) 72 665 9790")
+    email = models.EmailField(default="info@cedrichouseplans.co.za")
+    support_email = models.EmailField(default="support@cedrichouseplans.co.za")
+    address = models.TextField(default="South Africa")
+    
+    # Operating Hours
+    monday_friday = models.CharField(max_length=100, default="9:00 AM - 6:00 PM")
+    saturday = models.CharField(max_length=100, default="10:00 AM - 4:00 PM")
+    sunday = models.CharField(max_length=100, default="Closed")
+    
+    # Social Media
+    facebook_url = models.URLField(blank=True)
+    twitter_url = models.URLField(blank=True)
+    instagram_url = models.URLField(blank=True)
+
+    class Meta:
+        verbose_name = "Contact Information"
+        verbose_name_plural = "Contact Information"
+
+    def __str__(self):
+        return "Contact Information"
+
+class TeamMember(models.Model):
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100)
+    experience = models.CharField(max_length=50)
+    specialty = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='team/', blank=True, null=True)
+    order = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.name
+
+class Testimonial(models.Model):
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100, default="Verified Customer")
+    content = models.TextField()
+    rating = models.IntegerField(default=5)
+    initials = models.CharField(max_length=5)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.name} - {self.rating} stars"

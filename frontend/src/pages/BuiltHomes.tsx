@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Grid3x3, List, CircleHelp, Heart, Home, Bed, Bath, Car, Search, X, ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react';
+import { Grid3x3, List, CircleHelp, Heart, Home, Bed, Bath, Car, Search, X, ChevronDown, ChevronUp, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -28,7 +28,7 @@ import {
   DrawerTitle,
   DrawerClose,
 } from '@/components/ui/drawer';
-import { builtHomes } from '@/data/builtHomes';
+import { useBuiltHomes } from '@/hooks/useProperties';
 import { FilterState, SortOption, HousePlan } from '@/types/housePlan';
 import { cn } from '@/lib/utils';
 import { ImageGallery } from '@/components/ImageGallery';
@@ -46,16 +46,16 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
-  const [paymentInfo, setPaymentInfo] = useState({ 
-    cardNumber: '', 
-    expiryDate: '', 
-    cvv: '' 
+  const [paymentInfo, setPaymentInfo] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: ''
   });
 
   return (
     <>
       <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-        <div 
+        <div
           className="relative aspect-[4/3] overflow-hidden bg-muted cursor-pointer group"
           onClick={() => setIsGalleryOpen(true)}
         >
@@ -64,13 +64,13 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
             alt={plan.title}
             className="w-full h-full object-cover transition-transform group-hover:scale-105"
           />
-          
+
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
             <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium bg-black/50 px-4 py-2 rounded-full">
               View All {plan.images.length} Photos
             </span>
           </div>
-          
+
           <div className="absolute top-3 left-3 flex gap-2">
             <Badge className="bg-green-600 text-white">Completed</Badge>
             {plan.isPopular && (
@@ -130,7 +130,7 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
               </h3>
             </div>
             {plan.videoUrl && (
-              <Button 
+              <Button
                 size="sm"
                 onClick={() => setShowVideo(true)}
                 className="bg-red-400 hover:bg-red-500 text-white font-semibold shadow-md hover:shadow-lg transition-all whitespace-nowrap"
@@ -176,15 +176,15 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
           </div>
 
           <div className="flex gap-3">
-            <Button 
-              className="flex-1" 
+            <Button
+              className="flex-1"
               size="lg"
               onClick={() => navigate(`/house-details/${plan.id}`)}
             >
               View Details
             </Button>
-            <Button 
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold" 
+            <Button
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold"
               size="lg"
               onClick={() => setShowBuyModal(true)}
             >
@@ -195,11 +195,11 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
       </Card>
 
       {showVideo && plan.videoUrl && (
-        <div 
+        <div
           className="fixed inset-0 bg-black z-50 flex items-center justify-center"
           onClick={() => setShowVideo(false)}
         >
-          <div 
+          <div
             className="w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
@@ -272,8 +272,8 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
               </div>
 
               <div className="space-y-3">
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   size="lg"
                   onClick={() => setShowPaymentModal(true)}
                 >
@@ -384,8 +384,8 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
               </div>
 
               <div className="space-y-3">
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   size="lg"
                   onClick={() => {
                     setShowPaymentModal(false);
@@ -431,7 +431,7 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
 
               <h2 className="text-2xl font-bold mb-2">Purchase Successful!</h2>
               <p className="text-gray-600 mb-2">Thank you for your purchase.</p>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -453,8 +453,8 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
                 A confirmation email has been sent to <strong>{contactInfo.email}</strong>
               </p>
 
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 size="lg"
                 onClick={() => {
                   setShowSuccessModal(false);
@@ -486,6 +486,9 @@ export const BuiltHomes = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const itemsPerPage = 6;
 
+  // Fetch built homes from API
+  const { data: builtHomes = [], isLoading, error } = useBuiltHomes();
+
   // Listen for search events from header
   useEffect(() => {
     const handleSearch = (event: Event) => {
@@ -505,14 +508,14 @@ export const BuiltHomes = () => {
 
     const handleScroll = () => {
       const currentScrollY = contentElement.scrollTop;
-      
+
       // Show header when scrolling up, hide when scrolling down
       if (currentScrollY < lastScrollY) {
         setShowHeader(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
         setShowHeader(false);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
@@ -593,7 +596,7 @@ export const BuiltHomes = () => {
     }
 
     return filtered;
-  }, [filters, sortBy, searchQuery]);
+  }, [builtHomes, filters, sortBy, searchQuery]);
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedPlans.length / itemsPerPage);
@@ -607,6 +610,44 @@ export const BuiltHomes = () => {
     setCurrentPage(1);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-lg text-muted-foreground">Loading built homes...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <>
+        <Header />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-6">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <X className="h-8 w-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Failed to Load Built Homes</h2>
+            <p className="text-muted-foreground mb-4">
+              Unable to connect to the server. Please make sure the backend is running.
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Header />
@@ -618,15 +659,14 @@ export const BuiltHomes = () => {
           </div>
 
           {/* Main Content */}
-          <div 
+          <div
             ref={contentRef}
             className="flex-1 w-full overflow-y-auto"
           >
             {/* Header - Hidden on mobile when scrolling */}
-            <div 
-              className={`border-b bg-background sticky top-0 z-10 transition-all duration-300 md:translate-y-0 ${
-                showHeader ? 'translate-y-0' : '-translate-y-full'
-              }`}
+            <div
+              className={`border-b bg-background sticky top-0 z-10 transition-all duration-300 md:translate-y-0 ${showHeader ? 'translate-y-0' : '-translate-y-full'
+                }`}
             >
               <div className="px-4 md:px-8 py-4 md:py-6">
                 <div className="flex flex-col gap-4 mb-4">
@@ -676,22 +716,22 @@ export const BuiltHomes = () => {
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  {/* Sort Dropdown */}
-                  <Select
-                    value={sortBy}
-                    onValueChange={(value) => setSortBy(value as SortOption)}
-                  >
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">Newest</SelectItem>
-                      <SelectItem value="oldest">Oldest</SelectItem>
-                      <SelectItem value="price-high">Price High → Low</SelectItem>
-                      <SelectItem value="price-low">Price Low → High</SelectItem>
-                      <SelectItem value="popular">Most Popular</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {/* Sort Dropdown */}
+                    <Select
+                      value={sortBy}
+                      onValueChange={(value) => setSortBy(value as SortOption)}
+                    >
+                      <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Newest</SelectItem>
+                        <SelectItem value="oldest">Oldest</SelectItem>
+                        <SelectItem value="price-high">Price High → Low</SelectItem>
+                        <SelectItem value="price-low">Price Low → High</SelectItem>
+                        <SelectItem value="popular">Most Popular</SelectItem>
+                      </SelectContent>
+                    </Select>
                     {/* View Toggle */}
                     <div className="flex gap-1 border rounded-md p-1">
                       <Button
@@ -714,7 +754,7 @@ export const BuiltHomes = () => {
                   </div>
                 </div>
               </div>
-              
+
               <p className="text-sm md:text-base text-muted-foreground px-4 md:px-8 pb-4">
                 Showing {filteredAndSortedPlans.length} results
               </p>

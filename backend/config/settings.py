@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -41,10 +46,15 @@ INSTALLED_APPS = [
     # Third party apps
     'rest_framework',
     'corsheaders',
+    'cloudinary_storage',
+    'cloudinary',
+    'django_json_widget',
     
     # Local apps
     'properties',
     'inquiries',
+    'settings_app',
+    'orders',
 ]
 
 MIDDLEWARE = [
@@ -125,9 +135,23 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Media files
+# Cloudinary Configuration
+# TODO: Replace with your actual Cloudinary credentials
+# For production, use environment variables:
+# CLOUDINARY_STORAGE = {
+#     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+#     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+#     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET')
+# }
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'your_cloud_name',
+    'API_KEY': 'your_api_key',
+    'API_SECRET': 'your_api_secret'
+}
+
+# Media files - Using Cloudinary for storage
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True
@@ -136,3 +160,11 @@ CORS_ALLOW_ALL_ORIGINS = True
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Yoco Payment Gateway Settings
+YOCO_SECRET_KEY = os.environ.get('YOCO_SECRET_KEY', '')
+YOCO_PUBLIC_KEY = os.environ.get('YOCO_PUBLIC_KEY', '')
+
+# Frontend URL (for callbacks from payment gateways)
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:8080')
+

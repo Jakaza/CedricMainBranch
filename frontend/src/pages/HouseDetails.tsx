@@ -1,37 +1,47 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Heart, Phone, Mail, MapPin, Home, Bed, Bath, Square, Plus, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart, Phone, Mail, MapPin, Home, Bed, Bath, Square, Plus, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import Header from '@/components/Header';
-import { housePlans } from '@/data/housePlans';
-import { builtHomes } from '@/data/builtHomes';
+import { useProperty } from '@/hooks/useProperties';
+import { orderService } from '@/services/orderService';
+import { useToast } from '@/components/ui/use-toast';
 
 export const HouseDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState(0);
-  const [newRoomName, setNewRoomName] = useState('');
-  const [showAddRoom, setShowAddRoom] = useState(false);
   const [expandedFloors, setExpandedFloors] = useState<Record<number, boolean>>({ 0: true });
   const [showBuyModal, setShowBuyModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [contactInfo, setContactInfo] = useState({ name: '', email: '', phone: '' });
-  const [paymentInfo, setPaymentInfo] = useState({ 
-    cardNumber: '', 
-    expiryDate: '', 
-    cvv: '' 
-  });
 
-  // Find the plan from either housePlans or builtHomes
-  const plan = housePlans.find((p) => p.id === id) || builtHomes.find((p) => p.id === id);
+  // Fetch property from API
+  const { data: plan, isLoading, error } = useProperty(id || '');
 
-  if (!plan) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-lg text-muted-foreground">Loading property details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error or not found state
+  if (error || !plan) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
         <Header />
@@ -59,6 +69,31 @@ export const HouseDetails = () => {
     }));
   };
 
+  const handleCheckout = async () => {
+    if (!contactInfo.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address to proceed.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const response = await orderService.createCheckoutSession(plan.id, contactInfo.email);
+      window.location.href = response.redirectUrl;
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast({
+        title: "Checkout Failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+      setIsProcessing(false);
+    }
+  };
+
   const propertyFeatures = [
     { label: 'Bedrooms', value: plan.bedrooms, icon: Bed },
     { label: 'Bathrooms', value: plan.bathrooms, icon: Bath },
@@ -70,11 +105,11 @@ export const HouseDetails = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Back Button */}
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate(-1)}
           className="mb-6"
         >
@@ -129,9 +164,8 @@ export const HouseDetails = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${
-                    index === currentImageIndex ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'
-                  }`}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${index === currentImageIndex ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'
+                    }`}
                 >
                   <img src={image} alt={`View ${index + 1}`} className="w-full h-full object-cover" />
                 </button>
@@ -205,9 +239,8 @@ export const HouseDetails = () => {
                         ⚡ GROUND FLOOR ROOMS ⚡
                       </h3>
                       <ChevronRight
-                        className={`w-7 h-7 text-white drop-shadow-lg transition-transform ${
-                          expandedFloors[0] ? 'rotate-90' : ''
-                        }`}
+                        className={`w-7 h-7 text-white drop-shadow-lg transition-transform ${expandedFloors[0] ? 'rotate-90' : ''
+                          }`}
                       />
                     </button>
                     {expandedFloors[0] && (
@@ -244,9 +277,8 @@ export const HouseDetails = () => {
                           ⚡ 1st FLOOR ROOMS ⚡
                         </h3>
                         <ChevronRight
-                          className={`w-7 h-7 text-white drop-shadow-lg transition-transform ${
-                            expandedFloors[1] ? 'rotate-90' : ''
-                          }`}
+                          className={`w-7 h-7 text-white drop-shadow-lg transition-transform ${expandedFloors[1] ? 'rotate-90' : ''
+                            }`}
                         />
                       </button>
                       {expandedFloors[1] && (
@@ -282,9 +314,8 @@ export const HouseDetails = () => {
                           ⚡ 2nd FLOOR ROOMS ⚡
                         </h3>
                         <ChevronRight
-                          className={`w-7 h-7 text-white drop-shadow-lg transition-transform ${
-                            expandedFloors[2] ? 'rotate-90' : ''
-                          }`}
+                          className={`w-7 h-7 text-white drop-shadow-lg transition-transform ${expandedFloors[2] ? 'rotate-90' : ''
+                            }`}
                         />
                       </button>
                       {expandedFloors[2] && (
@@ -372,8 +403,8 @@ export const HouseDetails = () => {
                 R{plan.price.toLocaleString()}
               </p>
 
-              <Button 
-                className="w-full mb-6" 
+              <Button
+                className="w-full mb-6"
                 size="lg"
                 onClick={() => setShowBuyModal(true)}
               >
@@ -430,7 +461,7 @@ export const HouseDetails = () => {
       </div>
 
       {/* Buy Plan Modal */}
-      {showBuyModal && !showPaymentModal && (
+      {showBuyModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-md bg-white">
             <div className="p-6">
@@ -477,199 +508,30 @@ export const HouseDetails = () => {
               </div>
 
               <div className="space-y-3">
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   size="lg"
-                  onClick={() => setShowPaymentModal(true)}
+                  onClick={handleCheckout}
+                  disabled={isProcessing}
                 >
-                  Proceed to Payment
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Proceed to Payment'
+                  )}
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full"
                   onClick={() => setShowBuyModal(false)}
+                  disabled={isProcessing}
                 >
                   Cancel
                 </Button>
               </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Payment Details Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-white">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Payment Details</h2>
-                <button
-                  onClick={() => {
-                    setShowPaymentModal(false);
-                    setShowBuyModal(false);
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                {/* Full Name */}
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Full Name</label>
-                  <p className="text-lg font-bold text-gray-900">{contactInfo.name || 'John Doe'}</p>
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Email</label>
-                  <p className="text-lg font-bold text-gray-900">{contactInfo.email || 'john@example.com'}</p>
-                </div>
-
-                <div className="border-t pt-4">
-                  {/* Card Number */}
-                  <div className="mb-4">
-                    <label className="text-sm font-semibold text-gray-700 block mb-2">Card Number</label>
-                    <input
-                      type="text"
-                      placeholder="1234 5678 9012 3456"
-                      maxLength={19}
-                      value={paymentInfo.cardNumber}
-                      onChange={(e) => {
-                        let value = e.target.value.replace(/\s/g, '');
-                        value = value.replace(/(\d{4})/g, '$1 ').trim();
-                        setPaymentInfo({ ...paymentInfo, cardNumber: value });
-                      }}
-                      className="w-full px-3 py-2 border rounded-lg text-sm"
-                    />
-                  </div>
-
-                  {/* Expiry Date and CVV */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-2">Expiry Date</label>
-                      <input
-                        type="text"
-                        placeholder="MM/YY"
-                        maxLength={5}
-                        value={paymentInfo.expiryDate}
-                        onChange={(e) => {
-                          let value = e.target.value.replace(/\D/g, '');
-                          if (value.length >= 2) {
-                            value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                          }
-                          setPaymentInfo({ ...paymentInfo, expiryDate: value });
-                        }}
-                        className="w-full px-3 py-2 border rounded-lg text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700 block mb-2">CVV</label>
-                      <input
-                        type="text"
-                        placeholder="123"
-                        maxLength={3}
-                        value={paymentInfo.cvv}
-                        onChange={(e) => setPaymentInfo({ ...paymentInfo, cvv: e.target.value.replace(/\D/g, '') })}
-                        className="w-full px-3 py-2 border rounded-lg text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Price Summary */}
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold">Total Amount:</span>
-                    <span className="text-2xl font-bold text-primary">R{plan.price.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={() => {
-                    setShowPaymentModal(false);
-                    setShowSuccessModal(true);
-                  }}
-                >
-                  Complete Purchase
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setShowPaymentModal(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-white">
-            <div className="p-6 text-center">
-              {/* Checkmark Circle */}
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-12 h-12 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-
-              <h2 className="text-2xl font-bold mb-2">Purchase Successful!</h2>
-              <p className="text-gray-600 mb-2">Thank you for your purchase.</p>
-              
-              <div className="bg-gray-50 p-4 rounded-lg mb-6 text-left">
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Plan:</span>
-                    <span className="font-semibold">{plan.title}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Amount:</span>
-                    <span className="font-semibold">R{plan.price.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Email:</span>
-                    <span className="font-semibold">{contactInfo.email}</span>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-sm text-gray-600 mb-6">
-                A confirmation email has been sent to <strong>{contactInfo.email}</strong>
-              </p>
-
-              <Button 
-                className="w-full" 
-                size="lg"
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  setShowBuyModal(false);
-                  setContactInfo({ name: '', email: '', phone: '' });
-                  setPaymentInfo({ cardNumber: '', expiryDate: '', cvv: '' });
-                }}
-              >
-                Continue Shopping
-              </Button>
             </div>
           </Card>
         </div>

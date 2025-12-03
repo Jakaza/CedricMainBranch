@@ -5,26 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import heroHouse from "@/assets/hero-house.jpg";
-import houseMadison from "@/assets/house-madison.jpg";
-import houseOakwood from "@/assets/house-oakwood.jpg";
-import houseSummit from "@/assets/house-summit.jpg";
-import houseCraftsman from "@/assets/house-craftsman.jpg";
-import houseColonial from "@/assets/house-colonial.jpg";
-import houseRanch from "@/assets/house-ranch.jpg";
-import houseContemporary from "@/assets/house-contemporary.jpg";
+import { settingsService, SiteSettings, ContactInformation, Testimonial } from "@/services/settingsService";
+import { propertyService } from "@/services/propertyService";
+import { HousePlan } from "@/types/housePlan";
 
 // HousePlanCard Component
-const HousePlanCard = ({ 
-  image, 
-  title, 
-  beds, 
-  baths, 
-  sqft, 
+const HousePlanCard = ({
+  image,
+  title,
+  beds,
+  baths,
+  sqft,
   price,
-  isBestseller = false 
+  isBestseller = false,
+  id
 }: {
   image: string;
   title: string;
@@ -33,6 +29,7 @@ const HousePlanCard = ({
   sqft: string;
   price: string;
   isBestseller?: boolean;
+  id: string;
 }) => {
   return (
     <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 animate-fade-in">
@@ -42,19 +39,19 @@ const HousePlanCard = ({
             Bestseller
           </Badge>
         )}
-        <img 
-          src={image} 
-          alt={title} 
+        <img
+          src={image}
+          alt={title}
           className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <button className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm p-2 rounded-full hover:bg-card transition-colors">
           <Heart className="h-5 w-5 text-foreground hover:text-primary hover:fill-primary transition-colors" />
         </button>
       </div>
-      
+
       <div className="p-6 space-y-4">
         <h3 className="text-xl font-bold text-foreground">{title}</h3>
-        
+
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Bed className="h-4 w-4" />
@@ -69,10 +66,10 @@ const HousePlanCard = ({
             <span>{sqft} m²</span>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between pt-4 border-t border-border">
           <span className="text-2xl font-bold text-primary">R {price}</span>
-          <Link to="/house-plans">
+          <Link to={`/house-details/${id}`}>
             <Button>View Plan</Button>
           </Link>
         </div>
@@ -96,9 +93,9 @@ const TestimonialCard = ({ name, role, content, rating, initials }: {
           <Star key={i} className="h-5 w-5 text-star fill-star" />
         ))}
       </div>
-      
+
       <p className="text-foreground leading-relaxed">{content}</p>
-      
+
       <div className="flex items-center gap-3 pt-4">
         <Avatar className="h-12 w-12">
           <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
@@ -117,115 +114,55 @@ const TestimonialCard = ({ name, role, content, rating, initials }: {
 const Index = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("");
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [contactInfo, setContactInfo] = useState<ContactInformation | null>(null);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [popularPlans, setPopularPlans] = useState<HousePlan[]>([]);
+  const [bestSellingPlans, setBestSellingPlans] = useState<HousePlan[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSearch = (query?: string) => {
-    const searchTerm = query || searchQuery;
-    if (searchTerm.trim()) {
-      window.dispatchEvent(
-        new CustomEvent("planSearch", { detail: { query: searchTerm } })
-      );
-      navigate("/house-plans");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [settingsData, contactData, testimonialsData, plansData] = await Promise.all([
+          settingsService.getSettings(),
+          settingsService.getContactInfo(),
+          settingsService.getTestimonials(),
+          propertyService.getAll()
+        ]);
+
+        setSettings(settingsData);
+        setContactInfo(contactData);
+        setTestimonials(testimonialsData);
+
+        // For now, just slice the plans to simulate popular/best selling
+        // In a real app, you might have specific endpoints or flags
+        setPopularPlans(plansData.slice(0, 3));
+        setBestSellingPlans(plansData.slice(3, 7));
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      // Navigate to house plans page with search query
+      navigate(`/house-plans?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
   const handleBadgeClick = (badgeText: string) => {
-    setSelectedFilter(badgeText);
-    handleSearch(badgeText);
+    navigate(`/house-plans?search=${encodeURIComponent(badgeText)}`);
   };
 
-  // Popular Plans Data
-  const popularPlans = [
-    {
-      image: houseMadison,
-      title: "The Madison",
-      beds: 3,
-      baths: 2,
-      sqft: "200",
-      price: "1,299"
-    },
-    {
-      image: houseOakwood,
-      title: "The Oakwood",
-      beds: 4,
-      baths: 3,
-      sqft: "265",
-      price: "1,599"
-    },
-    {
-      image: houseSummit,
-      title: "The Summit",
-      beds: 5,
-      baths: 4,
-      sqft: "297",
-      price: "2,299"
-    }
-  ];
-
-  // Best Selling Plans Data
-  const bestSellingPlans = [
-    {
-      image: houseCraftsman,
-      title: "The Craftsman",
-      beds: 3,
-      baths: 2,
-      sqft: "172",
-      price: "999",
-      isBestseller: true
-    },
-    {
-      image: houseColonial,
-      title: "The Colonial",
-      beds: 4,
-      baths: 3,
-      sqft: "223",
-      price: "1,399",
-      isBestseller: true
-    },
-    {
-      image: houseRanch,
-      title: "The Ranch",
-      beds: 3,
-      baths: 2,
-      sqft: "153",
-      price: "899",
-      isBestseller: true
-    },
-    {
-      image: houseContemporary,
-      title: "The Contemporary",
-      beds: 4,
-      baths: 3,
-      sqft: "246",
-      price: "1,699",
-      isBestseller: true
-    }
-  ];
-
-  // Testimonials Data
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Verified Customer",
-      content: "The process was seamless and the plans were exactly what we needed. Our builder was impressed with the quality and detail.",
-      rating: 5,
-      initials: "SJ"
-    },
-    {
-      name: "Michael Chen",
-      role: "Verified Customer",
-      content: "Outstanding customer service and beautiful designs. We found our dream home plan and couldn't be happier with the result.",
-      rating: 5,
-      initials: "MC"
-    },
-    {
-      name: "Emily Rodriguez",
-      role: "Verified Customer",
-      content: "Professional, detailed plans that saved us time and money. The customization options were perfect for our needs.",
-      rating: 5,
-      initials: "ER"
-    }
-  ];
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -239,22 +176,19 @@ const Index = () => {
               <div className="space-y-8 animate-fade-in">
                 <div className="space-y-4">
                   <h1 className="text-5xl lg:text-6xl font-bold leading-tight text-foreground">
-                    Find Your Perfect
-                    <br />
-                    <span className="text-primary">House Plan</span>
+                    {settings?.hero_title || "Find Your Perfect House Plan"}
                   </h1>
                   <p className="text-lg text-muted-foreground max-w-xl">
-                    Discover thousands of professionally designed house plans.
-                    From modern minimalist to classic traditional styles.
+                    {settings?.hero_description || "Discover thousands of professionally designed house plans. From modern minimalist to classic traditional styles."}
                   </p>
                 </div>
-                
+
                 <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
                   <div className="flex gap-2 mb-4">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input 
-                        placeholder="Find your perfect house plan..." 
+                      <Input
+                        placeholder="Find your perfect house plan..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyPress={(e) => {
@@ -265,55 +199,30 @@ const Index = () => {
                         className="pl-10 h-12 text-base"
                       />
                     </div>
-                    <Button 
-                      size="lg" 
+                    <Button
+                      size="lg"
                       className="px-8"
                       onClick={() => handleSearch()}
                     >
                       Search
                     </Button>
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-2">
-                    <Badge 
-                      variant="secondary" 
-                      className="cursor-pointer hover:bg-secondary/80 transition-colors"
-                      onClick={() => handleBadgeClick("Modern")}
-                    >
-                      Modern
-                    </Badge>
-                    <Badge 
-                      variant="secondary" 
-                      className="cursor-pointer hover:bg-secondary/80 transition-colors"
-                      onClick={() => handleBadgeClick("3 Bedroom")}
-                    >
-                      3 Bedroom
-                    </Badge>
-                    <Badge 
-                      variant="secondary" 
-                      className="cursor-pointer hover:bg-secondary/80 transition-colors"
-                      onClick={() => handleBadgeClick("Double Storey")}
-                    >
-                      Double Storey
-                    </Badge>
-                    <Badge 
-                      variant="secondary" 
-                      className="cursor-pointer hover:bg-secondary/80 transition-colors"
-                      onClick={() => handleBadgeClick("Luxury")}
-                    >
-                      Luxury
-                    </Badge>
-                    <Badge 
-                      variant="secondary" 
-                      className="cursor-pointer hover:bg-secondary/80 transition-colors"
-                      onClick={() => handleBadgeClick("Affordable")}
-                    >
-                      Affordable
-                    </Badge>
+                    {["Modern", "3 Bedroom", "Double Storey", "Luxury", "Affordable"].map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-secondary/80 transition-colors"
+                        onClick={() => handleBadgeClick(tag)}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </div>
-              
+
               <div className="relative animate-scale-in">
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-hero">
                   <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
@@ -341,10 +250,20 @@ const Index = () => {
                 Trending designs chosen by thousands of homeowners
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {popularPlans.map((plan, index) => (
-                <HousePlanCard key={index} {...plan} />
+              {popularPlans.map((plan) => (
+                <HousePlanCard
+                  key={plan.id}
+                  id={plan.id}
+                  image={plan.images[0]}
+                  title={plan.title}
+                  beds={plan.bedrooms}
+                  baths={plan.bathrooms}
+                  sqft={plan.floorArea.toString()}
+                  price={plan.price.toLocaleString()}
+                  isBestseller={plan.isPopular}
+                />
               ))}
             </div>
           </div>
@@ -359,10 +278,20 @@ const Index = () => {
                 Our most loved house plans by customers nationwide
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {bestSellingPlans.map((plan, index) => (
-                <HousePlanCard key={index} {...plan} />
+              {bestSellingPlans.map((plan) => (
+                <HousePlanCard
+                  key={plan.id}
+                  id={plan.id}
+                  image={plan.images[0]}
+                  title={plan.title}
+                  beds={plan.bedrooms}
+                  baths={plan.bathrooms}
+                  sqft={plan.floorArea.toString()}
+                  price={plan.price.toLocaleString()}
+                  isBestseller={plan.isPopular}
+                />
               ))}
             </div>
           </div>
@@ -377,10 +306,17 @@ const Index = () => {
                 Join thousands of satisfied homeowners
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <TestimonialCard key={index} {...testimonial} />
+              {testimonials.map((testimonial) => (
+                <TestimonialCard
+                  key={testimonial.id}
+                  name={testimonial.name}
+                  role={testimonial.role}
+                  content={testimonial.content}
+                  rating={testimonial.rating}
+                  initials={testimonial.initials}
+                />
               ))}
             </div>
           </div>
@@ -394,7 +330,7 @@ const Index = () => {
               <p className="text-lg text-primary-foreground/90">
                 Get personalized building cost estimates and start your journey today.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                 <Link to="/get-quote">
                   <Button size="lg" className="text-lg px-8 bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
@@ -419,57 +355,63 @@ const Index = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Home className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold text-primary-foreground">Cedric House Planning</span>
+                <span className="text-lg font-bold text-primary-foreground">{settings?.company_name || "Cedric House Planning"}</span>
               </div>
               <p className="text-sm">
-                Creating beautiful, functional house plans for your dream home.
+                {settings?.tagline || "Creating beautiful, functional house plans for your dream home."}
               </p>
               <div className="flex gap-4">
-                <a href="#" className="hover:text-primary transition-colors">
-                  <Facebook className="h-5 w-5" />
-                </a>
-                <a href="#" className="hover:text-primary transition-colors">
-                  <Twitter className="h-5 w-5" />
-                </a>
-                <a href="#" className="hover:text-primary transition-colors">
-                  <Instagram className="h-5 w-5" />
-                </a>
+                {contactInfo?.facebook_url && (
+                  <a href={contactInfo.facebook_url} className="hover:text-primary transition-colors">
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {contactInfo?.twitter_url && (
+                  <a href={contactInfo.twitter_url} className="hover:text-primary transition-colors">
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                )}
+                {contactInfo?.instagram_url && (
+                  <a href={contactInfo.instagram_url} className="hover:text-primary transition-colors">
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
               </div>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-primary-foreground mb-4">House Plans</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-primary transition-colors">Modern Plans</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Traditional Plans</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Small House Plans</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Luxury Plans</a></li>
+                <li><Link to="/house-plans?search=Modern" className="hover:text-primary transition-colors">Modern Plans</Link></li>
+                <li><Link to="/house-plans?search=Traditional" className="hover:text-primary transition-colors">Traditional Plans</Link></li>
+                <li><Link to="/house-plans?search=Small" className="hover:text-primary transition-colors">Small House Plans</Link></li>
+                <li><Link to="/house-plans?search=Luxury" className="hover:text-primary transition-colors">Luxury Plans</Link></li>
               </ul>
             </div>
-            
+
             <div id="services">
               <h3 className="font-semibold text-primary-foreground mb-4">Services</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-primary transition-colors">Custom Design</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Plan Modifications</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Construction Support</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Cost Estimates</a></li>
+                <li><Link to="/services" className="hover:text-primary transition-colors">Custom Design</Link></li>
+                <li><Link to="/services" className="hover:text-primary transition-colors">Plan Modifications</Link></li>
+                <li><Link to="/services" className="hover:text-primary transition-colors">Construction Support</Link></li>
+                <li><Link to="/get-quote" className="hover:text-primary transition-colors">Cost Estimates</Link></li>
               </ul>
             </div>
-            
+
             <div id="about">
               <h3 className="font-semibold text-primary-foreground mb-4">Support</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Shipping Info</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Returns</a></li>
+                <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
+                <li><Link to="/about" className="hover:text-primary transition-colors">FAQ</Link></li>
+                <li><Link to="/about" className="hover:text-primary transition-colors">Shipping Info</Link></li>
+                <li><Link to="/about" className="hover:text-primary transition-colors">Returns</Link></li>
               </ul>
             </div>
           </div>
-          
+
           <div className="pt-8 border-t border-border/20 text-center text-sm">
-            <p className="mb-2">© 2024 Cedric House Planning and Construction. All rights reserved.</p>
+            <p className="mb-2">© {new Date().getFullYear()} {settings?.company_name || "Cedric House Planning"}. All rights reserved.</p>
             <p className="text-xs">Website Developers: <a href="#" className="text-red-600 hover:text-red-700 hover:underline">TAD Developers</a></p>
           </div>
         </div>
