@@ -29,8 +29,15 @@ SECRET_KEY = 'django-insecure-ugja274=3-$$qid5hir^t-_k!6rubtucghj8kwui*2q+jf9+yf
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.cedric-houseplan.com",
+    "https://cedricclient.onrender.com",
+    "https://cedricserver.onrender.com",
+]
 
 
 # Application definition
