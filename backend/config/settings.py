@@ -98,17 +98,38 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': os.environ.get('DATABASE_NAME', 'cedricdb'),
-        'USER': os.environ.get('DATABASE_USER', 'cedricdb_user'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'CAyzVDgNATlZ0ZxE7TFNaAvxu6XWfrLE'),
-        'HOST': os.environ.get('DATABASE_HOST', 'dpg-d4o2ejngi27c73dsca1g-a'),
-        'PORT': os.environ.get('DATABASE_PORT', '5432'),
-    }
-}
+# Check if all Postgres env vars are provided
+POSTGRES_READY = (
+    os.environ.get("DATABASE_ENGINE") and
+    os.environ.get("DATABASE_NAME") and
+    os.environ.get("DATABASE_USER") and
+    os.environ.get("DATABASE_PASSWORD") and
+    os.environ.get("DATABASE_HOST") and
+    os.environ.get("DATABASE_PORT")
+)
 
+if POSTGRES_READY:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.postgresql'),
+            'NAME': os.environ.get('DATABASE_NAME'),
+            'USER': os.environ.get('DATABASE_USER'),
+            'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+            'HOST': os.environ.get('DATABASE_HOST'),
+            'PORT': os.environ.get('DATABASE_PORT'),
+        }
+    }
+    print("Using Postgres database")
+else:
+    # Fallback to SQLite
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+    print("Using SQLite database")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -146,23 +167,49 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Cloudinary Configuration
-# TODO: Replace with your actual Cloudinary credentials
-# For production, use environment variables:
-# CLOUDINARY_STORAGE = {
-#     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-#     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-#     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET')
-# }
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'your_cloud_name',
-    'API_KEY': 'your_api_key',
-    'API_SECRET': 'your_api_secret'
+
+# Helper function to check for valid Cloudinary config
+def check_cloudinary_config():
+    return all([
+        os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        os.environ.get('CLOUDINARY_API_KEY'),
+        os.environ.get('CLOUDINARY_API_SECRET'),
+    ])
+
+CLOUDINARY_READY = check_cloudinary_config()
+
+# Default STORAGES configuration
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
 }
 
-# Media files - Using Cloudinary for storage
 MEDIA_URL = '/media/'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+if CLOUDINARY_READY:
+    # Cloudinary configuration
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    }
+    
+    # Update default storage to Cloudinary
+    STORAGES["default"] = {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"
+    }
+    
+    # Legacy support
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    
+    print("Using Cloudinary storage for media files.")
+else:
+    print("Using local storage for media files.")
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True

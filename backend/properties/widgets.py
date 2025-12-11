@@ -31,7 +31,7 @@ class DynamicTagWidget(forms.Widget):
             if isinstance(value, str):
                 try:
                     tags = json.loads(value)
-                except (json.JSONDecodeError, ValueError):
+                except (json.JSONDecodeError, ValueError, TypeError):
                     tags = [v.strip() for v in value.split(',') if v.strip()]
             elif isinstance(value, list):
                 tags = value
@@ -221,10 +221,7 @@ class DynamicTagWidget(forms.Widget):
     def value_from_datadict(self, data, files, name):
         """
         Extract value from form data.
+        Returns the raw JSON string so Django's JSONField can handle the parsing.
         """
-        value = data.get(name, '[]')
-        try:
-            return json.loads(value)
-        except (json.JSONDecodeError, ValueError):
-            return []
+        return data.get(name)
 
