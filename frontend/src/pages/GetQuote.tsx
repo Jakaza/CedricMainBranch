@@ -39,8 +39,25 @@ const GetQuote = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Map formData to backend expected format (snake_case)
+    const payload = {
+      full_name: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      city: formData.city,
+      preferred_style: formData.preferredStyle,
+      custom_style: formData.customStyle,
+      bedrooms: formData.bedrooms,
+      bathrooms: formData.bathrooms,
+      other_rooms: formData.otherRooms,
+      yard_length: formData.yardLength,
+      yard_breadth: formData.yardBreadth,
+      budget: formData.budget,
+      description: formData.description,
+    };
+
     try {
-      await submitQuote.mutateAsync(formData);
+      await submitQuote.mutateAsync(payload);
 
       // Show success message
       setSubmitted(true);
@@ -151,27 +168,8 @@ const GetQuote = () => {
                   <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
                   <h2 className="text-3xl font-bold text-green-800 mb-2">Quote Submitted Successfully!</h2>
                   <p className="text-green-700 mb-4">
-                    Your quote message has been opened in WhatsApp.
+                    Your quote message has been opened in WhatsApp. We'll get back to you within 24 hours!
                   </p>
-                  {uploadedFileName && (
-                    <div className="bg-white rounded-lg p-4 mb-4 border-2 border-green-400">
-                      <p className="text-sm text-green-800 font-semibold mb-3">
-                        📎 You have uploaded: <strong>{uploadedFileName}</strong>
-                      </p>
-                      <div className="bg-blue-50 p-3 rounded border border-blue-300 mb-3">
-                        <p className="text-xs text-blue-800 font-medium mb-2">✅ NEXT STEP:</p>
-                        <ol className="text-xs text-blue-800 space-y-1 text-left">
-                          <li>1. Go to the WhatsApp chat that just opened</li>
-                          <li>2. Click the paperclip icon (📎) to attach files</li>
-                          <li>3. Select and send your image file: <strong>{uploadedFileName}</strong></li>
-                          <li>4. Send the message</li>
-                        </ol>
-                      </div>
-                      <p className="text-xs text-green-700">
-                        Your quote message has already been sent. Just add the image and send!
-                      </p>
-                    </div>
-                  )}
                   <Button onClick={() => window.location.reload()}>Start New Quote</Button>
                 </Card>
               ) : (
