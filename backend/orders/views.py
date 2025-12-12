@@ -46,6 +46,13 @@ class CreateCheckoutSessionView(APIView):
         from django.conf import settings
         base_url = settings.FRONTEND_URL
         
+        # Fallback to request origin if FRONTEND_URL is not set or is localhost in production
+        if not base_url or 'localhost' in base_url:
+            origin = request.META.get('HTTP_ORIGIN')
+            if origin:
+                base_url = origin
+                print(f"Using Origin for base_url: {base_url}")
+        
         payload = {
             'amount': amount_in_cents,
             'currency': 'ZAR',
@@ -62,8 +69,10 @@ class CreateCheckoutSessionView(APIView):
             print(f"Sending request to Yoco with payload: {payload}")
             response = requests.post('https://payments.yoco.com/api/checkouts', json=payload, headers=headers)
             print(f"Yoco Response Status: {response.status_code}")
-            print(f"Yoco Response Body: {response.text}")
+            
+            # Raise error for 4xx/5xx
             response.raise_for_status()
+            
             data = response.json()
             
             # Update order with checkout ID
@@ -78,15 +87,20 @@ class CreateCheckoutSessionView(APIView):
         except requests.exceptions.RequestException as e:
             print(f"Yoco API Error: {e}")
             error_msg = str(e)
-            if e.response:
+            
+            if e.response is not None:
                 print(f"Response Status Code: {e.response.status_code}")
                 print(f"Response Text: {e.response.text}")
+                
                 try:
+                    # Try to parse JSON error
                     error_detail = e.response.json()
                     print(f"Response JSON: {error_detail}")
                     error_msg = f"{error_msg} - Details: {error_detail}"
                 except:
-                    error_msg += f" Response: {e.response.text}"
+                    # Fallback to raw text
+                    error_msg = f"{error_msg} - Raw: {e.response.text}"
+                    
             return Response({'error': error_msg}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PaymentSuccessView(APIView):
