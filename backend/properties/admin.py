@@ -4,6 +4,7 @@ from django.utils.html import format_html
 from django_json_widget.widgets import JSONEditorWidget
 from .models import Property, PropertyImage
 from .widgets import DynamicTagWidget
+from .room_spec_widget import RoomSpecificationWidget
 
 
 class PropertyAdminForm(forms.ModelForm):
@@ -18,6 +19,7 @@ class PropertyAdminForm(forms.ModelForm):
             'features': DynamicTagWidget(placeholder='Add a feature (e.g., Open Plan)'),
             'amenities': DynamicTagWidget(placeholder='Add an amenity (e.g., Swimming Pool)'),
             'floors': DynamicTagWidget(placeholder='Add a floor (e.g., Ground Floor)'),
+            'room_specifications': RoomSpecificationWidget(),
         }
     
     def __init__(self, *args, **kwargs):
@@ -36,8 +38,7 @@ class PropertyAdminForm(forms.ModelForm):
         self.fields['width'].required = True
         self.fields['depth'].required = True
         
-        # Styles is required
-        self.fields['styles'].required = True
+        
     
     def _clean_tag_field(self, field_name):
         """Helper method to clean comma-separated tag fields"""
@@ -142,7 +143,9 @@ class PropertyAdmin(admin.ModelAdmin):
                 ('bedrooms', 'bathrooms', 'garage'),
                 ('floor_area', 'levels'),
                 ('width', 'depth'),
-            )
+                'room_specifications',
+            ),
+            'description': 'Standard specifications above. Use "Room Specifications" below to add custom room types (e.g., Study Room, Gym, etc.)'
         }),
         ('Additional Features', {
             'fields': (

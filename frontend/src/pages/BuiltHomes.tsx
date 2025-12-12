@@ -76,6 +76,11 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
             {plan.isPopular && (
               <Badge className="bg-accent text-accent-foreground">Featured</Badge>
             )}
+            {plan.room_specifications && plan.room_specifications.length > 0 && (
+              <Badge className="bg-blue-600 text-white">
+                +{plan.room_specifications.length} Custom Rooms
+              </Badge>
+            )}
           </div>
 
           <button

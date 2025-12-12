@@ -223,6 +223,22 @@ export const HouseDetails = () => {
                 })}
               </div>
 
+              {/* Custom Room Specifications */}
+              {plan.room_specifications && plan.room_specifications.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-4">Additional Room Specifications</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {plan.room_specifications.map((room, index) => (
+                      <Card key={index} className="p-4 text-center bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                        <Home className="w-5 h-5 mx-auto mb-2 text-blue-600" />
+                        <p className="text-sm text-blue-900 font-semibold mb-1">{room.name}</p>
+                        <p className="text-2xl font-bold text-blue-700">{room.quantity}</p>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Room Breakdown - Floor Ground Floor Rooms */}
               {plan.levels && (
                 <div className="mt-6 space-y-4">

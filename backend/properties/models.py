@@ -8,20 +8,21 @@ class Property(models.Model):
 
     title = models.CharField(max_length=255)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default='PLAN')
-    price = models.DecimalField(max_digits=12, decimal_places=2)
-    bedrooms = models.IntegerField()
-    bathrooms = models.IntegerField()
-    garage = models.IntegerField()
-    floor_area = models.IntegerField()
-    levels = models.IntegerField()
-    width = models.DecimalField(max_digits=6, decimal_places=2)
-    depth = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    bedrooms = models.IntegerField(default=0)
+    bathrooms = models.IntegerField(default=0)
+    garage = models.IntegerField(default=0)
+    floor_area = models.IntegerField(default=0)
+    levels = models.IntegerField(default=0)
+    width = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    depth = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     
     # JSON fields for lists
-    styles = models.JSONField(default=list)
+    styles = models.JSONField(default=list, blank=True)
     features = models.JSONField(default=list, blank=True)
     amenities = models.JSONField(default=list, blank=True)
     floors = models.JSONField(default=list, blank=True)
+    room_specifications = models.JSONField(default=list, blank=True)  # Custom room types with quantities
     
     is_new = models.BooleanField(default=False)
     is_popular = models.BooleanField(default=False)
@@ -40,7 +41,8 @@ class Property(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name_plural = "Properties"
+        verbose_name = "Property (Built Homes / House Plans Page)"
+        verbose_name_plural = "Properties (Built Homes / House Plans Page)"
 
     def __str__(self):
         return self.title

@@ -20,10 +20,10 @@ class PropertySerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'category', 'price', 'bedrooms', 'bathrooms', 'garage',
             'floor_area', 'levels', 'width', 'depth', 'styles', 'features',
-            'amenities', 'floors', 'is_new', 'is_popular', 'description',
-            'video_url', 'en_suite', 'lounges', 'dining_areas', 'garage_parking',
-            'covered_parking', 'pet_friendly', 'created_at', 'updated_at',
-            'images', 'uploaded_images', 'image_urls'
+            'amenities', 'floors', 'room_specifications', 'is_new', 'is_popular', 
+            'description', 'video_url', 'en_suite', 'lounges', 'dining_areas', 
+            'garage_parking', 'covered_parking', 'pet_friendly', 'created_at', 
+            'updated_at', 'images', 'uploaded_images', 'image_urls'
         ]
 
     def get_image_urls(self, obj):

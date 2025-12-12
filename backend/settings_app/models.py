@@ -35,8 +35,8 @@ class SiteSettings(SingletonModel):
     client_satisfaction = models.CharField(max_length=50, default="98%")
     
     class Meta:
-        verbose_name = "Site Settings"
-        verbose_name_plural = "Site Settings"
+        verbose_name = "Site Settings (Homepage)"
+        verbose_name_plural = "Site Settings (Homepage)"
 
     def __str__(self):
         return "Site Settings"
@@ -74,6 +74,8 @@ class TeamMember(models.Model):
     
     class Meta:
         ordering = ['order']
+        verbose_name = "Team Member (About Page)"
+        verbose_name_plural = "Team Members (About Page)"
 
     def __str__(self):
         return self.name
@@ -86,6 +88,10 @@ class Testimonial(models.Model):
     initials = models.CharField(max_length=5)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Testimonial (Homepage)"
+        verbose_name_plural = "Testimonials (Homepage)"
     
     def __str__(self):
         return f"{self.name} - {self.rating} stars"
@@ -103,8 +109,8 @@ class Service(models.Model):
     
     class Meta:
         ordering = ['order', 'id']
-        verbose_name = "Service"
-        verbose_name_plural = "Services"
+        verbose_name = "Service (Services Page)"
+        verbose_name_plural = "Services (Services Page)"
     
     def __str__(self):
         return self.title
@@ -119,8 +125,8 @@ class PlanModification(models.Model):
     
     class Meta:
         ordering = ['order', 'id']
-        verbose_name = "Plan Modification"
-        verbose_name_plural = "Plan Modifications"
+        verbose_name = "Plan Modification (Services Page)"
+        verbose_name_plural = "Plan Modifications (Services Page)"
     
     def __str__(self):
         return self.title
@@ -135,8 +141,8 @@ class WhyTrustUs(models.Model):
     
     class Meta:
         ordering = ['order', 'id']
-        verbose_name = "Why Trust Us Item"
-        verbose_name_plural = "Why Trust Us"
+        verbose_name = "Why Trust Us Item (About Page)"
+        verbose_name_plural = "Why Trust Us (About Page)"
     
     def __str__(self):
         return self.title
@@ -150,8 +156,8 @@ class Certification(models.Model):
     
     class Meta:
         ordering = ['order', 'id']
-        verbose_name = "Certification"
-        verbose_name_plural = "Certifications"
+        verbose_name = "Certification (About Page)"
+        verbose_name_plural = "Certifications (About Page)"
     
     def __str__(self):
         return self.name

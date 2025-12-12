@@ -24,6 +24,10 @@ class Order(models.Model):
     receipt_generated = models.BooleanField(default=False)
     receipt_number = models.CharField(max_length=50, blank=True, null=True, unique=True)
     
+    class Meta:
+        verbose_name = "Order ( List of all orders )"
+        verbose_name_plural = "Orders ( List of all orders )"
+    
     def __str__(self):
         return f"Order #{self.id} - {self.plan.title} - {self.status}"
     

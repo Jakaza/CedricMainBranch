@@ -35,6 +35,7 @@ export interface HousePlan {
   petFriendly?: boolean;
   amenities?: string[];
   floors?: Floor[];
+  room_specifications?: Array<{ name: string, quantity: number }>;
 }
 
 export interface FilterState {
