@@ -211,7 +211,30 @@ function BuiltHomeCard({ plan }: { plan: HousePlan }) {
             <iframe
               width="100%"
               height="100%"
-              src={plan.videoUrl + "?autoplay=1&mute=1&loop=1&playlist=" + plan.videoUrl.split('/').pop()}
+              src={(() => {
+                const getEmbedUrl = (url: string) => {
+                  try {
+                    // Handle standard youtube.com/watch?v=ID
+                    if (url.includes('watch?v=')) {
+                      const videoId = url.split('watch?v=')[1].split('&')[0];
+                      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+                    }
+                    // Handle youtu.be/ID
+                    if (url.includes('youtu.be/')) {
+                      const videoId = url.split('youtu.be/')[1].split('?')[0];
+                      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+                    }
+                    // Handle youtube.com/embed/ID
+                    if (url.includes('/embed/')) {
+                      return `${url}?autoplay=1&mute=1`;
+                    }
+                    return url;
+                  } catch (e) {
+                    return url;
+                  }
+                };
+                return getEmbedUrl(plan.videoUrl);
+              })()}
               title={plan.title}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
